@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="my">
 <head>
@@ -657,14 +658,13 @@
       <div class="featured-badge">Popular</div>
       <span class="plan-icon">💜</span>
       <div class="plan-name">Premium Plan</div>
-      <div class="plan-desc">Pin VD ပါသော အထူး premium</div>
+      <div class="plan-desc">ရိုးရှင်းပြီး နှလုံးသားထဲ ထိုးဝင်သော</div>
       <div class="plan-price">5,000 <span>ကျပ်</span></div>
       <ul class="plan-features">
-        <li><span class="check">✿</span> Soft Plan အားလုံးပါ</li>
-        <li><span class="check">✿</span> Pin Video Message</li>
-        <li><span class="check">✿</span> Background music ထည့်မည်</li>
-        <li><span class="check">✿</span> ပုံများ ထည့်နိုင်</li>
-        <li><span class="check">✿</span> Priority 12 နာရီ ပြန်ပို့</li>
+        <li><span class="check">✿</span> ကိုယ်ပိုင် personalized message</li>
+        <li><span class="check">✿</span> မွေးနေ့ / ချော့ / သူငယ်ချင်းအတွက်</li>
+        <li><span class="check">✿</span> Text message format</li>
+        <li><span class="check">✿</span> ၂၄ နာရီ အတွင်း ပြန်ပို့</li>
       </ul>
       <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center;">မှာမည် 💜</a>
     </div>
@@ -693,7 +693,7 @@
       <select id="plan">
         <option value="">— Plan ရွေးပါ —</option>
         <option value="3000">🌸 Soft Plan — 3,000 ကျပ်</option>
-        <option value="5000">💜 Premium Plan (Pin VD) — 5,000 ကျပ်</option>
+        <option value="5000">💜 Premium Plan — 5,000 ကျပ်</option>
       </select>
     </div>
 
@@ -764,16 +764,34 @@
     const details = document.getElementById('details').value;
     const contact = document.getElementById('contact').value;
 
-    const msg = `မင်္ဂလာပါ! Message for You မှာ order တင်ချင်ပါတယ်\n\nအမည်: ${name}\nလက်ခံသူ: ${recipient}\nPlan: ${plan === '3000' ? '🌸 Soft Plan (3000 ကျပ်)' : '💜 Premium Plan (5000 ကျပ်)'}\nOccasion: ${occasion}\nအချက်အလက်: ${details}\nUsername: ${contact}`;
+    const msg = `💌 New Order — Message for You\n\n👤 အမည်: ${name}\n🎁 လက်ခံသူ: ${recipient}\n📦 Plan: ${plan === '3000' ? '🌸 Soft Plan (3000 ကျပ်)' : '💜 Premium Plan (5000 ကျပ်)'}\n🎀 Occasion: ${occasion}\n📝 အချက်အလက်: ${details || '—'}\n📲 Username: ${contact || '—'}`;
 
-    // Copy to clipboard
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(msg).then(() => {
-        showToast('📋 Order info ကူးယူပြီး! @xinxin2233 ကို paste လုပ်ပြီး ပို့ပါ');
-      });
-    } else {
-      showToast('💌 @xinxin2233 ကို ဆက်သွယ်ပြီး ဒီ info တွေပေးပါ!');
-    }
+    const BOT_TOKEN = '8740633367:AAGTUHgB5En4ivrt-zZbD7rDpcVb6yNysE';
+    const CHAT_ID = '6023365006';
+
+    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: CHAT_ID, text: msg })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.ok) {
+        showToast('✅ Order တင်ပြီးပါပြီ! မကြာမီ ဆက်သွယ်ပေးပါမယ် 💌');
+        // Clear form
+        document.getElementById('yourName').value = '';
+        document.getElementById('recipientName').value = '';
+        document.getElementById('plan').value = '';
+        document.getElementById('occasion').value = '';
+        document.getElementById('details').value = '';
+        document.getElementById('contact').value = '';
+      } else {
+        showToast('⚠️ တစ်ခုခုမှားသွားတယ်၊ @xinxin2233 ကို တိုက်ရိုက်ဆက်သွယ်ပါ');
+      }
+    })
+    .catch(() => {
+      showToast('⚠️ Internet စစ်ပြီး ထပ်ကြိုးစားပါ');
+    });
   }
 
   function showToast(msg) {
