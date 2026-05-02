@@ -639,7 +639,8 @@
   <p class="section-sub">သင့်အတွက် ကိုက်ညီသော plan ကိုရွေးပါ</p>
 
   <div class="pricing-grid">
-    <div class="pricing-card">
+    <div class="pricing-card featured">
+      <div class="featured-badge">ဘတ်ဂျက်</div>
       <span class="plan-icon">🌸</span>
       <div class="plan-name">Soft Plan</div>
       <div class="plan-desc">ရိုးရှင်းပြီး နှလုံးသားထဲ ထိုးဝင်သော</div>
@@ -654,9 +655,9 @@
     </div>
 
     <div class="pricing-card featured">
-      <div class="featured-badge">Popular</div>
+      <div class="featured-badge">လူကြိုက်များ</div>
       <span class="plan-icon">💜</span>
-      <div class="plan-name">Premium Plan</div>
+      <div class="plan-name">Soft Plan</div>
       <div class="plan-desc">ရိုးရှင်းပြီး နှလုံးသားထဲ ထိုးဝင်သော</div>
       <div class="plan-price">5,000 <span>ကျပ်</span></div>
       <ul class="plan-features">
@@ -676,15 +677,9 @@
   <p class="section-sub">အောက်ပါ form ကိုဖြည့်ပြီး @xinxin2233 မှာ ဆက်သွယ်ပါ</p>
 
   <div class="order-form">
-    <div class="form-row">
-      <div class="form-group">
-        <label>သင့်အမည် *</label>
-        <input type="text" placeholder="ကိုယ့်နာမည်" id="yourName">
-      </div>
-      <div class="form-group">
-        <label>လက်ခံသူ အမည် *</label>
-        <input type="text" placeholder="သူ/သူမ နာမည်" id="recipientName">
-      </div>
+    <div class="form-group">
+      <label>လက်ခံသူ TikTok / Telegram Username *</label>
+      <input type="text" placeholder="@username" id="recipientName">
     </div>
 
     <div class="form-group">
@@ -692,7 +687,7 @@
       <select id="plan">
         <option value="">— Plan ရွေးပါ —</option>
         <option value="3000">🌸 Soft Plan — 3,000 ကျပ်</option>
-        <option value="5000">💜 Premium Plan — 5,000 ကျပ်</option>
+        <option value="5000">💜 Soft Plan — 5,000 ကျပ်</option>
       </select>
     </div>
 
@@ -704,6 +699,7 @@
         <option value="love">💌 ချော့ချင်တာ / ရင်ဖွင့်ချင်တာ</option>
         <option value="friend">💜 သူငယ်ချင်းအတွက်</option>
         <option value="apology">🥺 တောင်းပန်ချင်တာ</option>
+        <option value="find">🔍 လူရှာချင်တာ</option>
         <option value="other">✨ အခြား</option>
       </select>
     </div>
@@ -750,12 +746,11 @@
 
   // Order handler
   function handleOrder() {
-    const name = document.getElementById('yourName').value.trim();
     const recipient = document.getElementById('recipientName').value.trim();
     const plan = document.getElementById('plan').value;
     const occasion = document.getElementById('occasion').value;
 
-    if (!name || !recipient || !plan || !occasion) {
+    if (!recipient || !plan || !occasion) {
       alert('⚠️ အချက်အလက်များ အားလုံးဖြည့်ပါ');
       return;
     }
@@ -763,7 +758,7 @@
     const details = document.getElementById('details').value;
     const contact = document.getElementById('contact').value;
 
-    const msg = `💌 New Order — Message for You\n\n👤 အမည်: ${name}\n🎁 လက်ခံသူ: ${recipient}\n📦 Plan: ${plan === '3000' ? '🌸 Soft Plan (3000 ကျပ်)' : '💜 Premium Plan (5000 ကျပ်)'}\n🎀 Occasion: ${occasion}\n📝 အချက်အလက်: ${details || '—'}\n📲 Username: ${contact || '—'}`;
+    const msg = `💌 New Order — Message for You\n\n🎁 လက်ခံသူ Username: ${recipient}\n📦 Plan: ${plan === '3000' ? '🌸 Soft Plan (3000 ကျပ်)' : '💜 Premium Plan (5000 ကျပ်)'}\n🎀 Occasion: ${occasion}\n📝 အချက်အလက်: ${details || '—'}\n📲 ဆက်သွယ်ရမည့် Username: ${contact || '—'}`;
 
     const BOT_TOKEN = '8740633367:AAGTUHgB5En4ivrt-zZbD7rDpcVb6yNysEE';
     const CHAT_ID = '6023365006';
@@ -778,7 +773,6 @@
       if (data.ok) {
         showToast('✅ Order တင်ပြီးပါပြီ! မကြာမီ ဆက်သွယ်ပေးပါမယ် 💌');
         // Clear form
-        document.getElementById('yourName').value = '';
         document.getElementById('recipientName').value = '';
         document.getElementById('plan').value = '';
         document.getElementById('occasion').value = '';
@@ -812,4 +806,4 @@
   });
 </script>
 </body>
-</html>
+    </html>
