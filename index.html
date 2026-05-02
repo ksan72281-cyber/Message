@@ -471,7 +471,7 @@
     background: var(--text-dark);
     color: var(--text-light);
     text-align: center;
-    padding: 2rem 1rem;
+    padding: 2rem 1rem 6rem;
     font-size: 0.85rem;
   }
 
@@ -565,7 +565,7 @@
   <p class="hero-desc">
     မွေးနေ့ · ချစ်ခြင်းမေတ္တာ · သူငယ်ချင်း<br>
     ကောင်မလေး/ကောင်လေးတွေ မိုးမိုးမောင်မောင် နားထောင်ချင်သော<br>
-    <strong>စိတ်ကောက်ကိုချော့ သောစကားလုံးများ</strong> ဤနေရာတွင် ရနိုင်သည်
+    <strong>စိတ်ကောက်တာကိုချော့ သောစကားလုံးများ</strong> ဤနေရာတွင် ရနိုင်သည်
   </p>
 
   <div class="btn-group">
@@ -632,12 +632,12 @@
     <div class="sample-card">
       <span class="sample-emoji">🎀</span>
       <span class="sample-tag tag-birthday">Pin VD</span>
-      <p class="sample-text">"မင်းကို ကြည့်ရင်း ကျွန်မ မျက်ရည်ကျနေတယ်... မင်းအတွက် ဘာမဆို လုပ်ပေးချင်တယ် 🎀"</p>
+      <p class="sample-text">Pin VD ယူရင် total 15,000 ကျသင့်ပါသည် 💜<br><br>📌 Pin လေးက လူရှိရင် 7 ရက် စောင့်ရပါမယ် — ပြည့်ရင် pin တင်ပေးပြီး ၁၂ နာရီအတွင်း အမြန်တင်ပေးပါသည် ✨</p>
     </div>
     <div class="sample-card">
-      <span class="sample-emoji">🌙</span>
-      <span class="sample-tag tag-friend">အထူး</span>
-      <p class="sample-text">"မင်းမိုးနေ့ ကျောင်းရောက်တဲ့နေ့ကတည်းက ငါ့ဘဝ ပိုတောက်ပလာတယ် ✨"</p>
+      <span class="sample-emoji">🔍</span>
+      <span class="sample-tag tag-friend">လူရှာ / Acc ရှာ</span>
+      <p class="sample-text">လူရှာ post တွေကို မင်မင်တို့ဘက်က 5,000 ယူပါတယ်ဗျ 🔍✨</p>
     </div>
   </div>
 
@@ -742,6 +742,23 @@
   <h2 class="section-title">ယခု <span class="accent">မှာယူ</span>မည်</h2>
   <p class="section-sub">အောက်ပါ form ကိုဖြည့်ပြီး @xinxin2233 မှာ ဆက်သွယ်ပါ</p>
 
+  <!-- ငွေချေနည်း info -->
+  <div style="max-width:600px; margin:0 auto 2rem; background:linear-gradient(135deg,#fdf0f5,#f0eaff); border-radius:20px; padding:1.5rem; border:1.5px solid #f5a8cb; font-size:0.9rem; color:var(--text-mid); line-height:2;">
+    <p style="font-weight:700; color:var(--pink-600); margin-bottom:0.8rem;">💳 ငွေချေထားချင်ရင် —</p>
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.6rem;">
+      <span>📱 <strong>KPay</strong> — Myint sa</span>
+      <button onclick="copyText('09422580742', this)" style="background:var(--pink-100); border:1px solid var(--pink-200); color:var(--pink-600); border-radius:20px; padding:0.2rem 0.8rem; font-size:0.8rem; cursor:pointer; white-space:nowrap; flex-shrink:0; margin-left:0.5rem;">09422580742 📋</button>
+    </div>
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.8rem;">
+      <span>📱 <strong>Wave</strong> — Daw Aye aye win</span>
+      <button onclick="copyText('09259588212', this)" style="background:var(--lavender); border:1px solid var(--lavender-200); color:var(--lavender-400); border-radius:20px; padding:0.2rem 0.8rem; font-size:0.8rem; cursor:pointer; white-space:nowrap; flex-shrink:0; margin-left:0.5rem;">09259588212 📋</button>
+    </div>
+
+    <p style="font-size:0.8rem; color:var(--pink-400); margin-top:0.5rem;">⚠️ Wave/KPay မှားထည့်လို့မရပါဘူးဗျ — မှားလွဲမိရင် တာဝန်မယူပါဘူး</p>
+  </div>
+
   <div class="order-form">
     <div class="form-group">
       <label>လက်ခံသူ TikTok / Telegram Username *</label>
@@ -752,14 +769,26 @@
       <label>Plan ရွေးချယ်ပါ *</label>
       <select id="plan">
         <option value="">— Plan ရွေးပါ —</option>
+        <option value="2000">🌷 Mini Plan — 2,000 ကျပ်</option>
         <option value="3000">🌸 Soft Plan — 3,000 ကျပ်</option>
         <option value="5000">💜 Soft Plan — 5,000 ကျပ်</option>
+        <option value="15000">🎀 Pin VD — 15,000 ကျပ်</option>
       </select>
     </div>
 
     <div class="form-group">
-      <label>Occasion / အကြောင်းအရာ *</label>
-      <select id="occasion">
+      <label>Video တင်ရန် Acc ရွေးပါ *</label>
+      <select id="account">
+        <option value="">— Acc ရွေးပါ —</option>
+        <option value="messageforyou2009">📱 messageforyou2009</option>
+        <option value="@Forthebestperson7">📱 @Forthebestperson7</option>
+        <option value="မင်မင်အဆင်ပြေရာ">📱 မင်မင်အဆင်ပြေရာ တင်ရန်</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label id="occasionLabel">Occasion / အကြောင်းအရာ *</label>
+      <select id="occasion" onchange="handleOccasionChange(this.value)">
         <option value="">— ရွေးပါ —</option>
         <option value="birthday">🎂 မွေးနေ့</option>
         <option value="love">💌 ချော့ချင်တာ / ရင်ဖွင့်ချင်တာ</option>
@@ -781,13 +810,31 @@
     </div>
 
     <div class="form-group">
-      <label>ပုံ ၁ (optional) 📸</label>
-      <input type="file" accept="image/*" id="photo1" style="padding:0.6rem 1rem; cursor:pointer;">
+      <label>Acc Profile ပုံ / လူပုံ 📸</label>
+      <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+        <input type="file" accept="image/*" id="photo1" style="padding:0.6rem 1rem; cursor:pointer; flex:1;">
+        <label style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
+          <input type="checkbox" id="noPhoto1" onchange="document.getElementById('photo1').disabled=this.checked; document.getElementById('photo1').value='';">
+          မရှိဘူး
+        </label>
+      </div>
     </div>
 
     <div class="form-group">
-      <label>ပုံ ၂ (optional) 📸</label>
-      <input type="file" accept="image/*" id="photo2" style="padding:0.6rem 1rem; cursor:pointer;">
+      <label>Acc Profile ပုံ / လူပုံ ၂ 📸</label>
+      <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+        <input type="file" accept="image/*" id="photo2" style="padding:0.6rem 1rem; cursor:pointer; flex:1;">
+        <label style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
+          <input type="checkbox" id="noPhoto2" onchange="document.getElementById('photo2').disabled=this.checked; document.getElementById('photo2').value='';">
+          မရှိဘူး
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>ငွေလွဲပြေစာ ပုံ 🧾 *</label>
+      <input type="file" accept="image/*" id="payslip" style="padding:0.6rem 1rem; cursor:pointer;">
+      <p style="font-size:0.8rem; color:var(--pink-400); margin-top:0.4rem;">⚠️ ငွေလွဲပြေစာ မထည့်ပါက order မတင်နိုင်ပါ</p>
     </div>
 
     <button class="form-submit" onclick="handleOrder()">
@@ -821,13 +868,49 @@
   }
 
   // Order handler
+  function copyText(text, btn) {
+    navigator.clipboard.writeText(text).then(() => {
+      const original = btn.textContent;
+      btn.textContent = '✅ Copied!';
+      btn.style.background = '#d4f5d4';
+      setTimeout(() => {
+        btn.textContent = original;
+        btn.style.background = '';
+      }, 2000);
+    });
+  }
+
+  function handleOccasionChange(val) {
+    const planSelect = document.getElementById('plan');
+    const occasionLabel = document.getElementById('occasionLabel');
+    const labels = {
+      'birthday': '🎂 မွေးနေ့',
+      'love': '💌 ချောချင်တာ / ရင်ဖွင့်ချင်တာ',
+      'friend': '💜 သူငယ်ချင်းအတွက်',
+      'apology': '🥺 တောင်းပန်ချင်တာ',
+      'find': '🔍 လူရှာချင်တာ',
+      'other': '✨ အခြား'
+    };
+    occasionLabel.textContent = val ? labels[val] + ' *' : 'Occasion / အကြောင်းအရာ *';
+    if (val === 'find') {
+      planSelect.value = '5000';
+    }
+  }
+
   async function handleOrder() {
     const recipient = document.getElementById('recipientName').value.trim();
     const plan = document.getElementById('plan').value;
     const occasion = document.getElementById('occasion').value;
+    const account = document.getElementById('account').value;
+    const payslip = document.getElementById('payslip').files[0];
 
-    if (!recipient || !plan || !occasion) {
+    if (!recipient || !plan || !occasion || !account) {
       alert('⚠️ အချက်အလက်များ အားလုံးဖြည့်ပါ');
+      return;
+    }
+
+    if (!payslip) {
+      alert('⚠️ ငွေလွဲပြေစာ ပုံ ထည့်ပါ — မထည့်ပါက order မတင်နိုင်ပါ');
       return;
     }
 
@@ -836,7 +919,7 @@
     const photo1 = document.getElementById('photo1').files[0];
     const photo2 = document.getElementById('photo2').files[0];
 
-    const msg = `💌 New Order — Message for You\n\n🎁 လက်ခံသူ Username: ${recipient}\n📦 Plan: ${plan === '3000' ? '🌸 Soft Plan (3000 ကျပ်)' : '💜 Soft Plan (5000 ကျပ်)'}\n🎀 Occasion: ${occasion}\n📝 အချက်အလက်: ${details || '—'}\n📲 ဆက်သွယ်ရမည့် Username: ${contact || '—'}`;
+    const msg = `💌 New Order — Message for You\n\n🎁 လက်ခံသူ Username: ${recipient}\n📦 Plan: ${plan === '2000' ? '🌷 Mini Plan (2000 ကျပ်)' : plan === '3000' ? '🌸 Soft Plan (3000 ကျပ်)' : plan === '5000' ? '💜 Soft Plan (5000 ကျပ်)' : '🎀 Pin VD (15000 ကျပ်)'}\n📱 Video တင်မည့် Acc: ${account}\n🎀 Occasion: ${occasion}\n📝 အချက်အလက်: ${details || '—'}\n📲 ဆက်သွယ်ရမည့် Username: ${contact || '—'}`;
 
     const BOT_TOKEN = '8740633367:AAGTUHgB5En4ivrt-zZbD7rDpcVb6yNysEE';
     const CHAT_ID = '6023365006';
@@ -846,17 +929,14 @@
     btn.textContent = '⏳ ပို့နေသည်...';
 
     try {
-      // Send text message
       const textRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chat_id: CHAT_ID, text: msg })
       });
       const textData = await textRes.json();
-
       if (!textData.ok) throw new Error('Message failed');
 
-      // Send photos if any
       const sendPhoto = async (file, caption) => {
         const fd = new FormData();
         fd.append('chat_id', CHAT_ID);
@@ -868,17 +948,20 @@
         });
       };
 
-      if (photo1) await sendPhoto(photo1, '📸 ပုံ ၁');
-      if (photo2) await sendPhoto(photo2, '📸 ပုံ ၂');
+      await sendPhoto(payslip, '🧾 ငွေလွဲပြေစာ');
+      if (photo1) await sendPhoto(photo1, '📸 Acc Profile / လူပုံ ၁');
+      if (photo2) await sendPhoto(photo2, '📸 Acc Profile / လူပုံ ၂');
 
       showToast('✅ Order တင်ပြီးပါပြီ! မကြာမီ ဆက်သွယ်ပေးပါမယ် 💌');
       document.getElementById('recipientName').value = '';
       document.getElementById('plan').value = '';
+      document.getElementById('account').value = '';
       document.getElementById('occasion').value = '';
       document.getElementById('details').value = '';
       document.getElementById('contact').value = '';
       document.getElementById('photo1').value = '';
       document.getElementById('photo2').value = '';
+      document.getElementById('payslip').value = '';
     } catch(e) {
       showToast('⚠️ တစ်ခုခုမှားသွားတယ်၊ @xinxin2233 ကို တိုက်ရိုက်ဆက်သွယ်ပါ');
     } finally {
