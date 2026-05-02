@@ -919,7 +919,16 @@
     const photo1 = document.getElementById('photo1').files[0];
     const photo2 = document.getElementById('photo2').files[0];
 
-    const msg = `💌 New Order — Message for You\n\n🎁 လက်ခံသူ Username: ${recipient}\n📦 Plan: ${plan === '2000' ? '🌷 Mini Plan (2000 ကျပ်)' : plan === '3000' ? '🌸 Soft Plan (3000 ကျပ်)' : plan === '5000' ? '💜 Soft Plan (5000 ကျပ်)' : '🎀 Pin VD (15000 ကျပ်)'}\n📱 Video တင်မည့် Acc: ${account}\n🎀 Occasion: ${occasion}\n📝 အချက်အလက်: ${details || '—'}\n📲 ဆက်သွယ်ရမည့် Username: ${contact || '—'}`;
+    const occasionText = {
+      'birthday': '🎂 မွေးနေ့',
+      'love': '💌 ချော့ချင်တာ / ရင်ဖွင့်ချင်တာ',
+      'friend': '💜 သူငယ်ချင်းအတွက်',
+      'apology': '🥺 တောင်းပန်ချင်တာ',
+      'find': '🔍 လူရှာချင်တာ',
+      'other': '✨ အခြား'
+    };
+
+    const msg = `💌 New Order — Message for You\n\n🎁 လက်ခံသူ Username: ${recipient}\n📦 Plan: ${plan === '2000' ? '🌷 Mini Plan (2000 ကျပ်)' : plan === '3000' ? '🌸 Soft Plan (3000 ကျပ်)' : plan === '5000' ? '💜 Soft Plan (5000 ကျပ်)' : '🎀 Pin VD (15000 ကျပ်)'}\n📱 Video တင်မည့် Acc: ${account}\n🎀 Occasion: ${occasionText[occasion] || occasion}\n📝 အချက်အလက်: ${details || '—'}\n📲 ဆက်သွယ်ရမည့် Username: ${contact || '—'}`;
 
     const BOT_TOKEN = '8740633367:AAGTUHgB5En4ivrt-zZbD7rDpcVb6yNysEE';
     const CHAT_ID = '6023365006';
@@ -937,20 +946,31 @@
       const textData = await textRes.json();
       if (!textData.ok) throw new Error('Message failed');
 
-      const sendPhoto = async (file, caption) => {
+      const sendFile = async (file, caption) => {
         const fd = new FormData();
         fd.append('chat_id', CHAT_ID);
-        fd.append('photo', file);
         fd.append('caption', caption);
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-          method: 'POST',
-          body: fd
+        // Try as photo first, fallback to document for large files
+        fd.append('photo', file);
+        const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+          method: 'POST', body: fd
         });
+        const data = await res.json();
+        if (!data.ok) {
+          // Fallback: send as document
+          const fd2 = new FormData();
+          fd2.append('chat_id', CHAT_ID);
+          fd2.append('caption', caption);
+          fd2.append('document', file);
+          await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, {
+            method: 'POST', body: fd2
+          });
+        }
       };
 
-      await sendPhoto(payslip, '🧾 ငွေလွဲပြေစာ');
-      if (photo1) await sendPhoto(photo1, '📸 Acc Profile / လူပုံ ၁');
-      if (photo2) await sendPhoto(photo2, '📸 Acc Profile / လူပုံ ၂');
+      await sendFile(payslip, '🧾 ငွေလွဲပြေစာ');
+      if (photo1) await sendFile(photo1, '📸 Acc Profile / လူပုံ ၁');
+      if (photo2) await sendFile(photo2, '📸 Acc Profile / လူပုံ ၂');
 
       showToast('✅ Order တင်ပြီးပါပြီ! မကြာမီ ဆက်သွယ်ပေးပါမယ် 💌');
       document.getElementById('recipientName').value = '';
