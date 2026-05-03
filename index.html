@@ -689,9 +689,9 @@
 <nav>
   <div class="nav-brand">𝑴𝒆𝒔𝒔𝒂𝒈𝒆 𝒇𝒐𝒓 𝒚𝒐𝒖ᥫ᭡</div>
   <ul class="nav-links">
-    <li><a href="#samples" onclick="event.preventDefault(); document.getElementById('samples').scrollIntoView({behavior:'smooth'});">နမူနာ</a></li>
-    <li><a href="#pricing" onclick="event.preventDefault(); document.getElementById('pricing').scrollIntoView({behavior:'smooth'});">စျေးနှုန်း</a></li>
-    <li><a href="#order" onclick="event.preventDefault(); document.getElementById('order').scrollIntoView({behavior:'smooth'});">မှာယူမည်</a></li>
+    <li><a href="#samples" onclick="event.preventDefault(); scrollTo('samples');">နမူနာ</a></li>
+    <li><a href="#pricing" onclick="event.preventDefault(); scrollTo('pricing');">စျေးနှုန်း</a></li>
+    <li><a href="#order" onclick="event.preventDefault(); scrollTo('order');">မှာယူမည်</a></li>
   </ul>
 </nav>
 
@@ -715,8 +715,8 @@
   </p>
 
   <div class="btn-group">
-    <a href="#order" class="btn-primary" onclick="event.preventDefault(); document.getElementById('order').scrollIntoView({behavior:'smooth'});">ဈေးနှုန်းကြည့်ပြီး မှာမယ် 💌</a>
-    <a href="#samples" class="btn-secondary" onclick="event.preventDefault(); document.getElementById('samples').scrollIntoView({behavior:'smooth'});">နမူနာများကြည့်မည်</a>
+    <a href="#order" class="btn-primary" onclick="event.preventDefault(); scrollTo('order');">ဈေးနှုန်းကြည့်ပြီး မှာမယ် 💌</a>
+    <a href="#samples" class="btn-secondary" onclick="event.preventDefault(); scrollTo('samples');">နမူနာများကြည့်မည်</a>
   </div>
 </section>
 
@@ -845,7 +845,7 @@
         <li><span class="check">✿</span> ပုံ format (image)</li>
         <li><span class="check">✿</span> ၂၄ နာရီ အတွင်း ပြန်ပို့</li>
       </ul>
-      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center;" onclick="event.preventDefault(); document.getElementById('order').scrollIntoView({behavior:'smooth'});">မှာမည် 🌷</a>
+      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center;" onclick="event.preventDefault(); scrollTo('order');">မှာမည် 🌷</a>
     </div>
 
     <!-- 3000 Plan -->
@@ -861,7 +861,7 @@
         <li><span class="check">✿</span> Video message format</li>
         <li><span class="check">✿</span> ၂၄ နာရီ အတွင်း ပြန်ပို့</li>
       </ul>
-      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center;" onclick="event.preventDefault(); document.getElementById('order').scrollIntoView({behavior:'smooth'});">မှာမည် 💌</a>
+      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center;" onclick="event.preventDefault(); scrollTo('order');">မှာမည် 💌</a>
     </div>
 
     <!-- 5000 Plan -->
@@ -877,7 +877,7 @@
         <li><span class="check">✿</span> Video message format</li>
         <li><span class="check">✿</span> ၂၄ နာရီ အတွင်း ပြန်ပို့</li>
       </ul>
-      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center;" onclick="event.preventDefault(); document.getElementById('order').scrollIntoView({behavior:'smooth'});">မှာမည် 💜</a>
+      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center;" onclick="event.preventDefault(); scrollTo('order');">မှာမည် 💜</a>
     </div>
 
   </div>
@@ -1328,6 +1328,11 @@
       }
     });
   });
+
+  function scrollTo(id) {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  }
 </script>
 </body>
 </html>
