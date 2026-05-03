@@ -703,13 +703,31 @@
         <p id="changePwMsg" style="font-size:0.78rem; margin-top:0.5rem; display:none;"></p>
       </div>
 
-      <div class="admin-total">
-        <span>💰 စုစုပေါင်း</span>
-        <span id="adminTotalAmt">0 ကျပ်</span>
+      <!-- Admin Tabs -->
+      <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+        <button id="tabOrders" onclick="switchAdminTab('orders')" style="flex:1; padding:0.5rem; border-radius:50px; border:1.5px solid var(--pink-200); background:linear-gradient(135deg,var(--pink-400),var(--lavender-400)); color:white; font-size:0.82rem; cursor:pointer;">📋 Orders</button>
+        <button id="tabLucky" onclick="switchAdminTab('lucky')" style="flex:1; padding:0.5rem; border-radius:50px; border:1.5px solid var(--lavender-200); background:white; color:var(--lavender-400); font-size:0.82rem; cursor:pointer;">🎰 မဲစာရင်း</button>
       </div>
-      <button class="admin-clear" onclick="clearOrders()">🗑 Order အကုန်ဖျက်မည်</button>
-      <div style="clear:both; margin-bottom:0.8rem;"></div>
-      <div id="adminOrderList"></div>
+
+      <!-- Orders Tab -->
+      <div id="adminTabOrders">
+        <div class="admin-total">
+          <span>💰 စုစုပေါင်း</span>
+          <span id="adminTotalAmt">0 ကျပ်</span>
+        </div>
+        <button class="admin-clear" onclick="clearOrders()">🗑 Order အကုန်ဖျက်မည်</button>
+        <div style="clear:both; margin-bottom:0.8rem;"></div>
+        <div id="adminOrderList"></div>
+      </div>
+
+      <!-- Lucky Draw Tab -->
+      <div id="adminTabLucky" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+          <span style="font-size:0.9rem; font-weight:600; color:var(--text-dark);">🎰 ကံစမ်းမဲ လူစာရင်း</span>
+          <button onclick="clearLuckyList()" style="background:#fff0f0; border:1px solid #f5a8a8; color:#c0392b; border-radius:50px; padding:0.3rem 0.9rem; font-size:0.78rem; cursor:pointer;">🗑 စာရင်းဖျက်မည်</button>
+        </div>
+        <div id="adminLuckyList" style="font-size:0.85rem; color:var(--text-mid); line-height:2;"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -728,6 +746,28 @@
   <div class="floating-petals" id="petals"></div>
 
   <div class="hero-badge">✨ မင်္ဂလာပါ ကြိုဆိုပါတယ် ✨</div>
+
+  <!-- ကံစမ်းမဲ လူစာရင်း -->
+  <div id="luckyDrawBox" style="
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(10px);
+    border: 1.5px solid var(--pink-200);
+    border-radius: 20px;
+    padding: 1rem 1.4rem;
+    margin-bottom: 1.5rem;
+    max-width: 420px;
+    width: 100%;
+    text-align: left;
+    box-shadow: 0 4px 20px rgba(224,104,154,0.12);
+  ">
+    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.7rem;">
+      <span style="font-size:1.2rem;">🎰</span>
+      <span style="font-family:'Playfair Display',serif; color:var(--pink-600); font-size:1rem; font-weight:600;">ကံစမ်းမဲ လူစာရင်း</span>
+    </div>
+    <div id="luckyDrawList" style="font-size:0.88rem; color:var(--text-mid); line-height:2;">
+      <span style="color:var(--text-light); font-style:italic;">— မဲနှိုက်ရန် Order တင်ပေးပါ —</span>
+    </div>
+  </div>
 
   <h1>
     <span class="italic">𝑴𝒆𝒔𝒔𝒂𝒈𝒆 𝒇𝒐𝒓 𝒚𝒐𝒖</span><br>
@@ -1174,75 +1214,245 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===== ORDER RECORDS via localStorage =====
-  const ORDERS_KEY = 'mfy_orders';
+  // ===== TELEGRAM CONFIG =====
+  const BOT = '8740633367:AAGTUHgB5En4ivrt-zZbD7rDpcVb6yNysEE';
+  const CID = '6023365006';
+  const TAG_ORDER = '🗂MFY_ORDER🗂';
+  const TAG_LUCKY = '🎰MFY_LUCKY🎰';
 
-  function getAllOrders() {
-    return JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
-  }
-
-  // Save order to localStorage
-  function saveOrderRecord(data) {
-    const orders = getAllOrders();
-    const id = Date.now();
-    orders.push({
-      id,
-      time:      data.time,
-      recipient: data.recipient || '—',
-      plan:      data.planLabel,
-      occasion:  data.occasion,
-      details:   data.details || '—',
-      contact:   data.contact || '—',
-      account:   data.account,
-      amount:    parseInt(data.amount)
+  async function tgSend(text) {
+    const r = await fetch(`https://api.telegram.org/bot${BOT}/sendMessage`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ chat_id: CID, text })
     });
-    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+    const d = await r.json();
+    return d.result ? d.result.message_id : null;
   }
 
-  function deleteOrder(id) {
-    if (!confirm('ဤ Order ကို ဖျက်မည်လား?')) return;
-    const orders = getAllOrders().filter(o => o.id !== id);
-    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
-    loadAdminRecords();
+  async function tgEdit(msgId, text) {
+    await fetch(`https://api.telegram.org/bot${BOT}/editMessageText`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ chat_id: CID, message_id: msgId, text })
+    });
   }
 
-  function loadAdminRecords() {
-    const list    = document.getElementById('adminOrderList');
-    const totalEl = document.getElementById('adminTotalAmt');
+  async function tgGetUpdates() {
+    const r = await fetch(`https://api.telegram.org/bot${BOT}/getUpdates?limit=200&allowed_updates=["message"]`);
+    const d = await r.json();
+    return d.ok ? (d.result || []) : [];
+  }
 
-    const orders = getAllOrders();
+  // ===== LUCKY DRAW via Telegram =====
+  // Lucky list stored as: TAG_LUCKY|["@user1","@user2",...]
+  // We find the message, update it in-place. MsgId stored in localStorage only as cache.
+  const LUCKY_MSGID_KEY = 'mfy_lucky_msgid';
 
-    if (orders.length === 0) {
-      list.innerHTML = '<p style="text-align:center;color:var(--text-light);font-size:0.85rem;">မှတ်တမ်း မရှိသေးပါ</p>';
-      totalEl.textContent = '0 ကျပ်';
+  function getLuckyMsgId() { return parseInt(localStorage.getItem(LUCKY_MSGID_KEY) || '0'); }
+  function setLuckyMsgId(id) { localStorage.setItem(LUCKY_MSGID_KEY, String(id)); }
+
+  async function fetchLuckyList() {
+    // Scan updates for the lucky list message
+    const updates = await tgGetUpdates();
+    let found = null;
+    for (const u of updates) {
+      const txt = u.message && u.message.text;
+      if (txt && txt.startsWith(TAG_LUCKY)) {
+        found = { msgId: u.message.message_id, txt };
+      }
+    }
+    if (!found) return { msgId: 0, list: [] };
+    setLuckyMsgId(found.msgId);
+    try {
+      const json = found.txt.replace(TAG_LUCKY + '|', '');
+      return { msgId: found.msgId, list: JSON.parse(json) };
+    } catch { return { msgId: found.msgId, list: [] }; }
+  }
+
+  async function saveLuckyList(list) {
+    const text = TAG_LUCKY + '|' + JSON.stringify(list);
+    const msgId = getLuckyMsgId();
+    if (msgId) {
+      // Try edit first
+      try { await tgEdit(msgId, text); return; } catch {}
+    }
+    // Send new
+    const newId = await tgSend(text);
+    if (newId) setLuckyMsgId(newId);
+  }
+
+  async function addToLuckyList(username) {
+    if (!username) return;
+    const { msgId, list } = await fetchLuckyList();
+    list.push(username);
+    await saveLuckyList(list);
+    renderLuckyDraw(list);
+  }
+
+  async function removeLuckyEntry(index) {
+    const { list } = await fetchLuckyList();
+    list.splice(index, 1);
+    await saveLuckyList(list);
+    renderLuckyDraw(list);
+    renderAdminLucky(list);
+  }
+
+  async function clearLuckyList() {
+    if (!confirm('ကံစမ်းမဲ စာရင်း အကုန် ဖျက်မည်လား?')) return;
+    await saveLuckyList([]);
+    renderLuckyDraw([]);
+    renderAdminLucky([]);
+  }
+
+  function renderLuckyDraw(list) {
+    const box = document.getElementById('luckyDrawList');
+    if (!box) return;
+    if (!list || list.length === 0) {
+      box.innerHTML = '<span style="color:var(--text-light); font-style:italic;">— မဲနှိုက်ရန် Order တင်ပေးပါ —</span>';
       return;
     }
-
-    let total = 0;
-    // Show newest first
-    list.innerHTML = [...orders].reverse().map((o, i) => {
-      total += o.amount;
-      return `<div class="order-record" id="ord_${o.id}">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
-          <strong>#${orders.length - i} &nbsp;⏰ ${o.time}</strong>
-          <button onclick="deleteOrder(${o.id})" style="background:#fff0f0;border:1px solid #f5a8a8;color:#c0392b;border-radius:50px;padding:0.2rem 0.7rem;font-size:0.75rem;cursor:pointer;">🗑 ဖျက်</button>
-        </div>
-        🎁 ${o.recipient}<br>
-        📦 ${o.plan}<br>
-        🎀 ${o.occasion}<br>
-        📝 ${o.details}<br>
-        📲 ${o.contact}<br>
-        📱 ${o.account}<br>
-        <strong style="color:var(--pink-400);">💰 ${o.amount.toLocaleString()} ကျပ်</strong>
-      </div>`;
-    }).join('');
-
-    totalEl.textContent = total.toLocaleString() + ' ကျပ်';
+    box.innerHTML = list.map((name, i) =>
+      `<div style="padding:0.15rem 0;">${i + 1}. <strong style="color:var(--pink-600);">${name}</strong></div>`
+    ).join('');
   }
 
-  function clearOrders() {
+  function renderAdminLucky(list) {
+    const box = document.getElementById('adminLuckyList');
+    if (!box) return;
+    if (!list || list.length === 0) {
+      box.innerHTML = '<p style="text-align:center; color:var(--text-light); font-size:0.85rem;">စာရင်း မရှိသေးပါ</p>';
+      return;
+    }
+    box.innerHTML = list.map((name, i) =>
+      `<div style="display:flex; justify-content:space-between; align-items:center; padding:0.4rem 0.6rem; background:var(--pink-50); border-radius:10px; margin-bottom:0.4rem;">
+        <span>${i + 1}. <strong>${name}</strong></span>
+        <button onclick="removeLuckyEntry(${i})" style="background:#fff0f0; border:1px solid #f5a8a8; color:#c0392b; border-radius:50px; padding:0.15rem 0.6rem; font-size:0.75rem; cursor:pointer;">ဖျက်</button>
+      </div>`
+    ).join('');
+  }
+
+  async function loadAdminLucky() {
+    const box = document.getElementById('adminLuckyList');
+    if (box) box.innerHTML = '<p style="text-align:center; color:var(--text-light); font-size:0.85rem;">⏳ ရယူနေသည်...</p>';
+    const { list } = await fetchLuckyList();
+    renderAdminLucky(list);
+  }
+
+  function switchAdminTab(tab) {
+    const isOrders = tab === 'orders';
+    document.getElementById('adminTabOrders').style.display = isOrders ? 'block' : 'none';
+    document.getElementById('adminTabLucky').style.display  = isOrders ? 'none' : 'block';
+    document.getElementById('tabOrders').style.background   = isOrders ? 'linear-gradient(135deg,var(--pink-400),var(--lavender-400))' : 'white';
+    document.getElementById('tabOrders').style.color        = isOrders ? 'white' : 'var(--text-mid)';
+    document.getElementById('tabLucky').style.background    = isOrders ? 'white' : 'linear-gradient(135deg,var(--pink-400),var(--lavender-400))';
+    document.getElementById('tabLucky').style.color         = isOrders ? 'var(--lavender-400)' : 'white';
+    if (!isOrders) loadAdminLucky();
+  }
+
+  // ===== ORDER RECORDS via Telegram =====
+  // Each order sent as: TAG_ORDER|ID:ts\n...fields...
+  const DEL_KEY = 'mfy_del_ids';
+  function getDelIds() { return JSON.parse(localStorage.getItem(DEL_KEY) || '[]'); }
+  function addDelId(id) { const a = getDelIds(); a.push(id); localStorage.setItem(DEL_KEY, JSON.stringify(a)); }
+
+  async function saveOrderRecord(data) {
+    const ts = Date.now();
+    const text = `${TAG_ORDER}|ID:${ts}
+⏰ ${data.time}
+🎁 လက်ခံသူ: ${data.recipient || '—'}
+📦 Plan: ${data.planLabel}
+🎀 Occasion: ${data.occasion}
+📝 စာ: ${data.details || '—'}
+📲 ဆက်သွယ်ရန်: ${data.contact || '—'}
+📱 Acc: ${data.account}
+💰 ${parseInt(data.amount).toLocaleString()} ကျပ်`;
+    await tgSend(text);
+  }
+
+  async function deleteOrder(id) {
+    if (!confirm('ဤ Order ကို ဖျက်မည်လား?')) return;
+    addDelId(id);
+    const el = document.getElementById('ord_' + id);
+    if (el) el.remove();
+    await loadAdminRecords();
+  }
+
+  async function loadAdminRecords() {
+    const list    = document.getElementById('adminOrderList');
+    const totalEl = document.getElementById('adminTotalAmt');
+    list.innerHTML = '<p style="text-align:center;color:var(--text-light);font-size:0.85rem;">⏳ မှတ်တမ်းများ ရယူနေသည်...</p>';
+
+    try {
+      const updates = await tgGetUpdates();
+      const delIds  = getDelIds();
+      const orders  = [];
+
+      for (const u of updates) {
+        const txt = u.message && u.message.text;
+        if (!txt || !txt.startsWith(TAG_ORDER)) continue;
+        const idMatch = txt.match(/ID:(\d+)/);
+        const id = idMatch ? parseInt(idMatch[1]) : 0;
+        if (delIds.includes(id)) continue;
+
+        const lines = txt.split('\n');
+        const get = (prefix) => {
+          const l = lines.find(x => x.startsWith(prefix));
+          return l ? l.replace(prefix, '').trim() : '—';
+        };
+        const amtMatch = txt.match(/💰 ([\d,]+) ကျပ်/);
+        const amount = amtMatch ? parseInt(amtMatch[1].replace(/,/g, '')) : 0;
+
+        orders.push({
+          id,
+          time:      get('⏰ '),
+          recipient: get('🎁 လက်ခံသူ: '),
+          plan:      get('📦 Plan: '),
+          occasion:  get('🎀 Occasion: '),
+          details:   get('📝 စာ: '),
+          contact:   get('📲 ဆက်သွယ်ရန်: '),
+          account:   get('📱 Acc: '),
+          amount
+        });
+      }
+
+      if (orders.length === 0) {
+        list.innerHTML = '<p style="text-align:center;color:var(--text-light);font-size:0.85rem;">မှတ်တမ်း မရှိသေးပါ</p>';
+        totalEl.textContent = '0 ကျပ်';
+        return;
+      }
+
+      let total = 0;
+      list.innerHTML = [...orders].reverse().map((o, i) => {
+        total += o.amount;
+        return `<div class="order-record" id="ord_${o.id}">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+            <strong>#${orders.length - i} &nbsp;⏰ ${o.time}</strong>
+            <button onclick="deleteOrder(${o.id})" style="background:#fff0f0;border:1px solid #f5a8a8;color:#c0392b;border-radius:50px;padding:0.2rem 0.7rem;font-size:0.75rem;cursor:pointer;">🗑 ဖျက်</button>
+          </div>
+          🎁 ${o.recipient}<br>
+          📦 ${o.plan}<br>
+          🎀 ${o.occasion}<br>
+          📝 ${o.details}<br>
+          📲 ${o.contact}<br>
+          📱 ${o.account}<br>
+          <strong style="color:var(--pink-400);">💰 ${o.amount.toLocaleString()} ကျပ်</strong>
+        </div>`;
+      }).join('');
+
+      totalEl.textContent = total.toLocaleString() + ' ကျပ်';
+
+    } catch(e) {
+      list.innerHTML = '<p style="text-align:center;color:#e74c3c;font-size:0.85rem;">⚠️ ရယူမရပါ — ပြန်ကြိုးစားပါ</p>';
+    }
+  }
+
+  async function clearOrders() {
     if (!confirm('Order မှတ်တမ်း အကုန် ဖျက်မည်လား?')) return;
-    localStorage.removeItem(ORDERS_KEY);
-    loadAdminRecords();
+    // Mark all visible as deleted
+    document.querySelectorAll('.order-record').forEach(el => {
+      const id = parseInt(el.id.replace('ord_', ''));
+      if (id) addDelId(id);
+    });
+    await loadAdminRecords();
   }
 
   // Lock Soft Plan 10000 by default (only available for announce)
@@ -1372,9 +1582,6 @@ document.addEventListener('DOMContentLoaded', function() {
       'apology': '🥺 တောင်းပန်တာ', 'find': '🔍 လူရှာ', 'announce': '📢 ကြေငြာ', 'other': '✨ အခြား'
     };
 
-    const BOT_TOKEN = '8740633367:AAGTUHgB5En4ivrt-zZbD7rDpcVb6yNysEE';
-    const CHAT_ID = '6023365006';
-
     const btn = document.querySelector('.form-submit');
     btn.disabled = true;
     btn.textContent = '⏳ ပို့နေသည်...';
@@ -1382,42 +1589,34 @@ document.addEventListener('DOMContentLoaded', function() {
     const stickyBar = document.getElementById('stickyBar');
     if (stickyBar) stickyBar.style.display = 'none';
 
-    const sendMsg = async (text) => {
-      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: CHAT_ID, text })
-      });
-    };
-
     const sendFile = async (file, cap) => {
       const fd = new FormData();
-      fd.append('chat_id', CHAT_ID);
+      fd.append('chat_id', CID);
       fd.append('photo', file);
       fd.append('caption', cap);
-      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: fd });
+      await fetch(`https://api.telegram.org/bot${BOT}/sendPhoto`, { method: 'POST', body: fd });
     };
 
     try {
-      // ① အချက်အလက်အစုံ — ခွဲခွဲပြပြ
-      await sendMsg(`🆕 NEW ORDER လာပါပြီ ✨`);
-      await sendMsg(`🎁 လက်ခံသူ: ${recipient || 'N/A'}`);
-      await sendMsg(`📦 Plan: ${plan} ကျပ်`);
-      await sendMsg(`🎀 အကြောင်းအရာ: ${occasionText[occasion]}`);
-      if (details) await sendMsg(`📝 စာ / အချက်အလက်:\n${details}`);
-      if (contact) await sendMsg(`📲 ဆက်သွယ်ရန်: ${contact}`);
-      if (account) await sendMsg(`📱 Acc ရွေးချယ်မှု: ${account}`);
+      // ① notification messages to Telegram
+      await tgSend(`🆕 NEW ORDER လာပါပြီ ✨`);
+      await tgSend(`🎁 လက်ခံသူ: ${recipient || 'N/A'}`);
+      await tgSend(`📦 Plan: ${plan} ကျပ်`);
+      await tgSend(`🎀 အကြောင်းအရာ: ${occasionText[occasion]}`);
+      if (details) await tgSend(`📝 စာ / အချက်အလက်:\n${details}`);
+      if (contact) await tgSend(`📲 ဆက်သွယ်ရန်: ${contact}`);
+      if (account) await tgSend(`📱 Acc ရွေးချယ်မှု: ${account}`);
 
-      // ② ပုံများ ခွဲပြပို့
+      // ② ပုံများ
       if (payslip) await sendFile(payslip, '🧾 ငွေလွဲပြေစာ');
       if (photo1) await sendFile(photo1, '📸 ပုံ ၁ (Profile/ပုံ)');
       if (photo2) await sendFile(photo2, '📸 ပုံ ၂');
 
-      await sendMsg(`✅ Order ပြီးဆုံးပါပြီ — စစ်ဆေးပေးပါ 🙏`);
+      await tgSend(`✅ Order ပြီးဆုံးပါပြီ — စစ်ဆေးပေးပါ 🙏`);
 
-      // Save to localStorage for admin panel
-      const planLabels = {'5000':'Basic 5,000','7000':'Standard 7,000','15000':'Pin VD 15,000','10000':'Soft 10,000','20000':'Pin VD 20,000'};
-      saveOrderRecord({
+      // ③ Structured order record (Telegram-backed, all devices)
+      const planLabels = {'2000':'Mini 2,000','3000':'Soft 3,000','5000':'Soft 5,000','7000':'Fast 7,000','15000':'Pin VD 15,000','10000':'Soft 10,000','20000':'Pin VD 20,000'};
+      await saveOrderRecord({
         time: new Date().toLocaleString('my-MM'),
         recipient: recipient,
         planLabel: planLabels[plan] || plan,
@@ -1427,6 +1626,9 @@ document.addEventListener('DOMContentLoaded', function() {
         contact: contact,
         amount: plan
       });
+
+      // ④ Lucky draw list (Telegram-backed, all devices)
+      if (contact) await addToLuckyList(contact);
 
       showToast('✅ Order တင်ပြီးပါပြီ!');
 
@@ -1507,18 +1709,29 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
 
+  // Init lucky draw on page load — fetch from Telegram
+  (async () => {
+    try {
+      const { list } = await fetchLuckyList();
+      renderLuckyDraw(list);
+    } catch { renderLuckyDraw([]); }
+  })();
+
   // Expose functions globally for inline onclick handlers
   window.openAdmin = openAdmin;
   window.closeAdmin = closeAdmin;
   window.checkAdminPw = checkAdminPw;
   window.clearOrders = clearOrders;
+  window.clearLuckyList = clearLuckyList;
   window.copyText = copyText;
   window.deleteOrder = deleteOrder;
   window.doChangePw = doChangePw;
   window.handleOccasionChange = handleOccasionChange;
   window.handleOrder = handleOrder;
+  window.removeLuckyEntry = removeLuckyEntry;
   window.showChangePw = showChangePw;
+  window.switchAdminTab = switchAdminTab;
 }); // end DOMContentLoaded
 </script>
 </body>
-        </html>
+</html>
