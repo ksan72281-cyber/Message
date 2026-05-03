@@ -27,6 +27,7 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
+    padding-bottom: 70px;
     font-family: 'Noto Sans Myanmar', sans-serif;
     background: var(--cream);
     color: var(--text-dark);
@@ -471,7 +472,7 @@
     background: var(--text-dark);
     color: var(--text-light);
     text-align: center;
-    padding: 2rem 1rem 6rem;
+    padding: 2rem 1rem 5rem;
     font-size: 0.85rem;
   }
 
@@ -518,7 +519,7 @@
   /* ===== TOAST ===== */
   .toast {
     position: fixed;
-    bottom: 2rem; left: 50%;
+    bottom: 5rem; left: 50%;
     transform: translateX(-50%) translateY(100px);
     background: linear-gradient(135deg, var(--pink-400), var(--lavender-400));
     color: white;
@@ -543,9 +544,9 @@
 <nav>
   <div class="nav-brand">𝑴𝒆𝒔𝒔𝒂𝒈𝒆 𝒇𝒐𝒓 𝒚𝒐𝒖ᥫ᭡</div>
   <ul class="nav-links">
-    <li><a href="#samples">နမူနာ</a></li>
-    <li><a href="#pricing">စျေးနှုန်း</a></li>
-    <li><a href="#order">မှာယူမည်</a></li>
+    <li><a href="#samples" onclick="event.preventDefault(); document.getElementById('samples').scrollIntoView({behavior:'smooth'});">နမူနာ</a></li>
+    <li><a href="#pricing" onclick="event.preventDefault(); document.getElementById('pricing').scrollIntoView({behavior:'smooth'});">စျေးနှုန်း</a></li>
+    <li><a href="#order" onclick="event.preventDefault(); document.getElementById('order').scrollIntoView({behavior:'smooth'});">မှာယူမည်</a></li>
   </ul>
 </nav>
 
@@ -569,8 +570,8 @@
   </p>
 
   <div class="btn-group">
-    <a href="#order" class="btn-primary">ဈေးနှုန်းကြည့်ပြီး မှာမယ် 💌</a>
-    <a href="#samples" class="btn-secondary">နမူနာများကြည့်မည်</a>
+    <a href="#order" class="btn-primary" onclick="event.preventDefault(); document.getElementById('order').scrollIntoView({behavior:'smooth'});">ဈေးနှုန်းကြည့်ပြီး မှာမယ် 💌</a>
+    <a href="#samples" class="btn-secondary" onclick="event.preventDefault(); document.getElementById('samples').scrollIntoView({behavior:'smooth'});">နမူနာများကြည့်မည်</a>
   </div>
 </section>
 
@@ -699,7 +700,7 @@
         <li><span class="check">✿</span> ပုံ format (image)</li>
         <li><span class="check">✿</span> ၂၄ နာရီ အတွင်း ပြန်ပို့</li>
       </ul>
-      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center;">မှာမည် 🌷</a>
+      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center;" onclick="event.preventDefault(); document.getElementById('order').scrollIntoView({behavior:'smooth'});">မှာမည် 🌷</a>
     </div>
 
     <!-- 3000 Plan -->
@@ -715,7 +716,7 @@
         <li><span class="check">✿</span> Video message format</li>
         <li><span class="check">✿</span> ၂၄ နာရီ အတွင်း ပြန်ပို့</li>
       </ul>
-      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center;">မှာမည် 💌</a>
+      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center;" onclick="event.preventDefault(); document.getElementById('order').scrollIntoView({behavior:'smooth'});">မှာမည် 💌</a>
     </div>
 
     <!-- 5000 Plan -->
@@ -731,7 +732,7 @@
         <li><span class="check">✿</span> Video message format</li>
         <li><span class="check">✿</span> ၂၄ နာရီ အတွင်း ပြန်ပို့</li>
       </ul>
-      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center;">မှာမည် 💜</a>
+      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center;" onclick="event.preventDefault(); document.getElementById('order').scrollIntoView({behavior:'smooth'});">မှာမည် 💜</a>
     </div>
 
   </div>
@@ -744,10 +745,10 @@
 
   <!-- ငွေချေနည်း info -->
   <div style="max-width:600px; margin:0 auto 2rem; background:linear-gradient(135deg,#fdf0f5,#f0eaff); border-radius:20px; padding:1.5rem; border:1.5px solid #f5a8cb; font-size:0.9rem; color:var(--text-mid); line-height:2;">
-    <p style="font-weight:700; color:var(--pink-600); margin-bottom:0.8rem;">💳 ငွေချေထားချင်ရင် —</p>
+    <p style="font-weight:700; color:var(--pink-600); margin-bottom:0.8rem;">💳 ငွေပေးချေရန် ဖုန်းနံပတ် —</p>
 
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.6rem;">
-      <span>📱 <strong>KPay</strong> — Myint sa</span>
+      <span>📱 <strong>KPay</strong> — Myint Sabal</span>
       <button onclick="copyText('09422580742', this)" style="background:var(--pink-100); border:1px solid var(--pink-200); color:var(--pink-600); border-radius:20px; padding:0.2rem 0.8rem; font-size:0.8rem; cursor:pointer; white-space:nowrap; flex-shrink:0; margin-left:0.5rem;">09422580742 📋</button>
     </div>
 
@@ -761,7 +762,7 @@
 
   <div class="order-form">
     <div class="form-group">
-      <label>လက်ခံသူ TikTok / Telegram Username *</label>
+      <label id="recipientLabel">လက်ခံသူ TikTok / Telegram Username *</label>
       <input type="text" placeholder="@username" id="recipientName">
     </div>
 
@@ -800,17 +801,17 @@
     </div>
 
     <div class="form-group">
-      <label>ပိုမိုသိချင်သည်များ / ထည့်ချင်သော အကြောင်းအရာ</label>
-      <textarea placeholder="ဥပမာ: သူ ဘောလုံးကြိုက်တယ်, ကျောင်းတက်တဲ့ ၅ နှစ်ဖြစ်တယ်, ပန်းရောင်ကြိုက်တယ် — ဘာမဆို ပြောလို့ရပါတယ် 💕" id="details"></textarea>
+      <label>စာအပ်ရန် / ရေးသားရန် နေရာ</label>
+      <textarea placeholder="ဥပမာ: သူချစ်တာ မင်းမဟုတ်ဘူး — ဘာမဆို ပြောလို့ရပါတယ် 💕" id="details"></textarea>
     </div>
 
     <div class="form-group">
-      <label>TikTok / Telegram Username (result ပို့ဖို့)</label>
-      <input type="text" placeholder="@yourusername" id="contact">
+      <label>TikTok / Telegram သင့် Username ပေးပို့ရန် (ပြန်ဆက်သွယ်ရန်)</label>
+      <input type="text" placeholder="@yourusername (ပြန်ဆက်သွယ်ရန်)" id="contact">
     </div>
 
     <div class="form-group">
-      <label>Acc Profile ပုံ / လူပုံ 📸</label>
+      <label style="white-space:nowrap; font-size:0.8rem;">Acc Profile ပုံ / လူပုံ 📸 <span style="font-weight:400; color:var(--pink-400);">(မိမိထည့်ချင်သောပုံ)</span></label>
       <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
         <input type="file" accept="image/*" id="photo1" style="padding:0.6rem 1rem; cursor:pointer; flex:1;">
         <label style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
@@ -821,7 +822,7 @@
     </div>
 
     <div class="form-group">
-      <label>Acc Profile ပုံ / လူပုံ ၂ 📸</label>
+      <label style="white-space:nowrap; font-size:0.8rem;">Acc Profile ပုံ / လူပုံ ၂ 📸 <span style="font-weight:400; color:var(--pink-400);">(မိမိထည့်ချင်သောပုံ)</span></label>
       <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
         <input type="file" accept="image/*" id="photo2" style="padding:0.6rem 1rem; cursor:pointer; flex:1;">
         <label style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
@@ -846,11 +847,43 @@
 <!-- Footer -->
 <footer>
   <p style="font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.2rem; color: #f5a8cb; margin-bottom: 0.5rem;">𝑴𝒆𝒔𝒔𝒂𝒈𝒆 𝒇𝒐𝒓 𝒚𝒐𝒖ᥫ᭡</p>
-  <p>Order — <a href="#">@xinxin2233</a> မှာ ဆက်သွယ်ပါ</p>
+  <p>Order — <a href="https://t.me/xinxin2233" target="_blank">@xinxin2233</a> မှာ ဆက်သွယ်ပါ</p>
   <p style="margin-top: 0.5rem; font-size: 0.75rem; opacity: 0.5;">Made with 💜 for everyone who has something to say</p>
 </footer>
 
-<div class="toast" id="toast">💌 @xinxin2233 ကို ဆက်သွယ်ပြီး ငွေပေးချေပါ!</div>
+<!-- Sticky Contact Bar -->
+<div style="
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(135deg, #e0689a, #9b7be8);
+  color: white;
+  text-align: center;
+  padding: 0.9rem 1rem;
+  z-index: 200;
+  box-shadow: 0 -4px 20px rgba(224,104,154,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+">
+  <span style="font-size: 0.95rem; font-family: 'Noto Sans Myanmar', sans-serif;">💌 <strong>@xinxin2233</strong></span>
+  <a href="https://t.me/xinxin2233" target="_blank" style="
+    background: white;
+    color: #e0689a;
+    border: none;
+    border-radius: 50px;
+    padding: 0.4rem 1.2rem;
+    font-size: 0.85rem;
+    font-family: 'Noto Sans Myanmar', sans-serif;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+  ">ဆက်သွယ်မည် →</a>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
   // Falling petals
@@ -883,17 +916,33 @@
   function handleOccasionChange(val) {
     const planSelect = document.getElementById('plan');
     const occasionLabel = document.getElementById('occasionLabel');
+    const recipientInput = document.getElementById('recipientName');
+    const recipientLabel = document.getElementById('recipientLabel');
     const labels = {
       'birthday': '🎂 မွေးနေ့',
       'love': '💌 ချောချင်တာ / ရင်ဖွင့်ချင်တာ',
       'friend': '💜 သူငယ်ချင်းအတွက်',
       'apology': '🥺 တောင်းပန်ချင်တာ',
-      'find': '🔍 လူရှာချင်တာ',
+      'find': '🔍 လူရှာ / Acc ရှာ',
       'other': '✨ အခြား'
     };
     occasionLabel.textContent = val ? labels[val] + ' *' : 'Occasion / အကြောင်းအရာ *';
     if (val === 'find') {
       planSelect.value = '5000';
+      recipientInput.disabled = true;
+      recipientInput.value = '';
+      recipientInput.placeholder = '🔍 လူရှာ plan တွင် မလိုအပ်ပါ';
+      recipientInput.style.background = '#f5f0ff';
+      recipientInput.style.color = '#9b7be8';
+      recipientInput.style.borderColor = '#d8c8f8';
+      recipientLabel.textContent = 'လက်ခံသူ Username (လူရှာ plan — မလိုအပ်ပါ)';
+    } else {
+      recipientInput.disabled = false;
+      recipientInput.placeholder = '@username';
+      recipientInput.style.background = '';
+      recipientInput.style.color = '';
+      recipientInput.style.borderColor = '';
+      recipientLabel.textContent = 'လက်ခံသူ TikTok / Telegram Username *';
     }
   }
 
@@ -904,7 +953,8 @@
     const account = document.getElementById('account').value;
     const payslip = document.getElementById('payslip').files[0];
 
-    if (!recipient || !plan || !occasion || !account) {
+    const isFindOccasion = occasion === 'find';
+    if ((!recipient && !isFindOccasion) || !plan || !occasion || !account) {
       alert('⚠️ အချက်အလက်များ အားလုံးဖြည့်ပါ');
       return;
     }
@@ -972,7 +1022,7 @@
       if (photo1) await sendFile(photo1, '📸 Acc Profile / လူပုံ ၁');
       if (photo2) await sendFile(photo2, '📸 Acc Profile / လူပုံ ၂');
 
-      showToast('✅ Order တင်ပြီးပါပြီ! မကြာမီ ဆက်သွယ်ပေးပါမယ် 💌');
+      showToast('✅ Order တင်ပြီးပါပြီ! Order တင်ပေးတဲ့အတွက် ကျေးဇူးတင်ပါသည် 💜 မကြာမီ @xinxin2233 မှ ဆက်သွယ်ပေးပါမည် 💌');
       document.getElementById('recipientName').value = '';
       document.getElementById('plan').value = '';
       document.getElementById('account').value = '';
