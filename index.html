@@ -1035,7 +1035,7 @@
 </footer>
 
 <!-- Sticky Contact Bar -->
-<div style="
+<div id="stickyBar" style="
   position: fixed;
   bottom: 0; left: 0; right: 0;
   background: linear-gradient(135deg, #e0689a, #9b7be8);
@@ -1049,6 +1049,7 @@
   justify-content: center;
   gap: 0.8rem;
   flex-wrap: wrap;
+  transition: transform 0.25s ease;
 ">
   <span style="font-size: 0.9rem; font-family: 'Noto Sans Myanmar', sans-serif;">📢 <strong>မင်မင်တို့ websiteမှာ ကြေငြာအပ်ချင်ရင် ဆက်သွယ်ရန်ကိုနှိပ်ပါ</strong></span>
   <a href="https://t.me/xinxin2233" target="_blank" style="
@@ -1296,35 +1297,77 @@
     btn.disabled = true;
     btn.textContent = '⏳ ပို့နေသည်...';
     document.getElementById('waitMsg').style.display = 'block';
+    const stickyBar = document.getElementById('stickyBar');
+    if (stickyBar) stickyBar.style.display = 'none';
 
-    try {
-      const summary = `💌 New Order\n🎁 လက်ခံသူ: ${recipient || 'N/A'}\n📦 Plan: ${plan}\n🎀 အကြောင်းအရာ: ${occasionText[occasion]}\n📝 အချက်အလက်: ${details}\n📲 ဆက်သွယ်ရန်: ${contact}`;
-      
+    const sendMsg = async (text) => {
       await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: CHAT_ID, text: summary })
+        body: JSON.stringify({ chat_id: CHAT_ID, text })
       });
+    };
 
-      const sendFile = async (file, cap) => {
-        const fd = new FormData();
-        fd.append('chat_id', CHAT_ID);
-        fd.append('photo', file);
-        fd.append('caption', cap);
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: fd });
-      };
+    const sendFile = async (file, cap) => {
+      const fd = new FormData();
+      fd.append('chat_id', CHAT_ID);
+      fd.append('photo', file);
+      fd.append('caption', cap);
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: fd });
+    };
 
-      if (payslip) await sendFile(payslip, '🧾 ပြေစာ');
-      if (photo1) await sendFile(photo1, '📸 ပုံ ၁');
+    try {
+      // ① အချက်အလက်အစုံ — ခွဲခွဲပြပြ
+      await sendMsg(`🆕 NEW ORDER လာပါပြီ ✨`);
+      await sendMsg(`🎁 လက်ခံသူ: ${recipient || 'N/A'}`);
+      await sendMsg(`📦 Plan: ${plan} ကျပ်`);
+      await sendMsg(`🎀 အကြောင်းအရာ: ${occasionText[occasion]}`);
+      if (details) await sendMsg(`📝 စာ / အချက်အလက်:\n${details}`);
+      if (contact) await sendMsg(`📲 ဆက်သွယ်ရန်: ${contact}`);
+      if (account) await sendMsg(`📱 Acc ရွေးချယ်မှု: ${account}`);
+
+      // ② ပုံများ ခွဲပြပို့
+      if (payslip) await sendFile(payslip, '🧾 ငွေလွဲပြေစာ');
+      if (photo1) await sendFile(photo1, '📸 ပုံ ၁ (Profile/ပုံ)');
       if (photo2) await sendFile(photo2, '📸 ပုံ ၂');
 
+      await sendMsg(`✅ Order ပြီးဆုံးပါပြီ — စစ်ဆေးပေးပါ 🙏`);
+
       showToast('✅ Order တင်ပြီးပါပြီ!');
+
+      // ===== FORM CLEAR after success =====
+      document.getElementById('recipientName').value = '';
+      document.getElementById('plan').value = '';
+      document.getElementById('occasion').value = '';
+      document.getElementById('account').value = '';
+      document.getElementById('details').value = '';
+      document.getElementById('contact').value = '';
+
+      // Reset file inputs
+      ['payslip','photo1','photo2'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+
+      // Uncheck "မရှိဘူး" checkboxes & re-enable file inputs
+      ['noPhoto1','noPhoto2'].forEach(id => {
+        const cb = document.getElementById(id);
+        if (cb) { cb.checked = false; }
+      });
+      document.getElementById('photo1').disabled = false;
+      document.getElementById('photo2').disabled = false;
+
+      // Reset occasion-dependent UI
+      handleOccasionChange('');
+      document.getElementById('occasionLabel').textContent = 'Occasion / အကြောင်းအရာ *';
     } catch(e) {
       showToast('⚠️ ချို့ယွင်းချက်ရှိနေပါသည်');
     } finally {
       btn.disabled = false;
       btn.textContent = '💌 မှာယူမည် — @xinxin2233 ဆက်သွယ်ရန်';
       document.getElementById('waitMsg').style.display = 'none';
+      const stickyBar = document.getElementById('stickyBar');
+      if (stickyBar) stickyBar.style.display = 'flex';
     }
   }
 
@@ -1334,6 +1377,34 @@
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 5000);
   }
+
+
+  // ===== KEYBOARD DETECTION — hide sticky bar when typing =====
+  (function() {
+    const bar = document.getElementById('stickyBar');
+    if (!bar) return;
+    let initialH = window.innerHeight;
+
+    function onResize() {
+      const currentH = window.innerHeight;
+      // If viewport shrinks by more than 150px, keyboard is likely open
+      if (initialH - currentH > 150) {
+        bar.style.transform = 'translateY(200%)';
+      } else {
+        bar.style.transform = 'translateY(0)';
+      }
+    }
+
+    window.addEventListener('resize', onResize);
+
+    // Also hide on focus of any input/textarea/select inside order form
+    document.querySelectorAll('.order-form input, .order-form textarea, .order-form select').forEach(el => {
+      el.addEventListener('focus', () => { bar.style.transform = 'translateY(200%)'; });
+      el.addEventListener('blur', () => {
+        setTimeout(() => { bar.style.transform = 'translateY(0)'; }, 300);
+      });
+    });
+  })();
 
   function smoothScrollTo(id) {
     const el = document.getElementById(id);
