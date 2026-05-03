@@ -664,40 +664,22 @@
 
     <!-- Login Box -->
     <div id="adminLoginBox">
-      <h2>🔐 Admin Panel</h2>
-      <p style="font-size:0.82rem; color:var(--text-light); margin-bottom:1rem;">Owner သာ ဝင်ရောက်ခွင့်ရှိသည်</p>
+      <h2>🔐 Admin မှတ်တမ်း</h2>
+      <p style="font-size:0.82rem; color:var(--text-light); margin-bottom:1rem;">Admin / Owner သာ ဝင်ရောက်ခွင့်ရှိသည်</p>
       <input type="password" id="adminPwInput" placeholder="Password ထည့်ပါ" onkeydown="if(event.key==='Enter') checkAdminPw()">
       <br>
       <button onclick="checkAdminPw()">ဝင်ရောက်မည်</button>
       <p id="adminPwErr" style="color:#e74c3c; font-size:0.8rem; margin-top:0.5rem; display:none;">Password မှားသည် ❌</p>
     </div>
 
-    <!-- Records Box -->
+    <!-- Records Box (hidden until login) -->
     <div id="adminRecords" style="display:none;">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
-        <h2 style="margin:0;">📋 Order မှတ်တမ်း</h2>
-        <button onclick="showChangePw()" style="background:var(--lavender); border:none; border-radius:50px; padding:0.3rem 0.9rem; font-size:0.78rem; color:var(--lavender-400); cursor:pointer;">🔑 PW ပြောင်း</button>
-      </div>
-
-      <!-- Change PW box -->
-      <div id="changePwBox" style="display:none; background:var(--pink-50); border:1.5px solid var(--pink-100); border-radius:14px; padding:1rem; margin-bottom:1rem;">
-        <p style="font-size:0.8rem; color:var(--text-mid); margin-bottom:0.4rem;">လက်ရှိ Password</p>
-        <input type="password" id="oldPwInput" placeholder="လက်ရှိ PW" style="width:100%; padding:0.6rem 0.8rem; border:1.5px solid var(--pink-200); border-radius:10px; font-size:0.9rem; margin-bottom:0.5rem; outline:none; display:block;">
-        <p style="font-size:0.8rem; color:var(--text-mid); margin-bottom:0.4rem;">Password အသစ်</p>
-        <input type="password" id="newPwInput" placeholder="Password အသစ်" style="width:100%; padding:0.6rem 0.8rem; border:1.5px solid var(--pink-200); border-radius:10px; font-size:0.9rem; margin-bottom:0.5rem; outline:none; display:block;">
-        <input type="password" id="newPwConfirm" placeholder="Password အသစ် အတည်ပြု" style="width:100%; padding:0.6rem 0.8rem; border:1.5px solid var(--pink-200); border-radius:10px; font-size:0.9rem; margin-bottom:0.7rem; outline:none; display:block;">
-        <div style="display:flex; gap:0.5rem;">
-          <button onclick="doChangePw()" style="flex:1; background:linear-gradient(135deg,var(--pink-400),var(--lavender-400)); color:white; border:none; border-radius:50px; padding:0.5rem; font-size:0.85rem; cursor:pointer;">သိမ်းမည်</button>
-          <button onclick="document.getElementById('changePwBox').style.display='none';" style="flex:1; background:white; border:1.5px solid var(--pink-200); border-radius:50px; padding:0.5rem; font-size:0.85rem; cursor:pointer; color:var(--text-mid);">မလုပ်တော့</button>
-        </div>
-        <p id="changePwMsg" style="font-size:0.78rem; margin-top:0.5rem; display:none;"></p>
-      </div>
-
+      <h2>📋 Order မှတ်တမ်းများ</h2>
       <div class="admin-total">
-        <span>💰 စုစုပေါင်း</span>
+        <span>💰 စုစုပေါင်း Order ကြေး</span>
         <span id="adminTotalAmt">0 ကျပ်</span>
       </div>
-      <button class="admin-clear" onclick="clearOrders()">🗑 Order အကုန်ဖျက်မည်</button>
+      <button class="admin-clear" onclick="clearOrders()">🗑 မှတ်တမ်းဖျက်မည်</button>
       <div style="clear:both; margin-bottom:0.8rem;"></div>
       <div id="adminOrderList"></div>
     </div>
@@ -733,8 +715,8 @@
   </p>
 
   <div class="btn-group">
-    <button class="btn-primary" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'});">စျေးနှုန်းများကြည့်ရန် ↓</button>
-    <button class="btn-secondary" onclick="document.getElementById('samples').scrollIntoView({behavior:'smooth'});">နမူနာများကြည့်ရန် ↓</button>
+    <a href="#order" class="btn-primary" onclick="event.preventDefault(); smoothScrollTo('order');">ဈေးနှုန်းကြည့်ပြီး မှာမယ် 💌</a>
+    <a href="#samples" class="btn-secondary" onclick="event.preventDefault(); smoothScrollTo('samples');">နမူနာများကြည့်မည်</a>
   </div>
 </section>
 
@@ -1088,20 +1070,13 @@
 <div class="toast" id="toast"></div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-
   // ===== ADMIN PANEL =====
-  const ADMIN_PW_KEY = 'mfy_admin_pw';
-
-  function getAdminPw() {
-    return localStorage.getItem(ADMIN_PW_KEY) || '2862009H';
-  }
+  const ADMIN_PW = '2862009H'; // password ပြောင်းချင်ရင် ဤနေရာမှာ ပြောင်းပါ
 
   function openAdmin() {
     document.getElementById('adminOverlay').classList.add('open');
     document.getElementById('adminLoginBox').style.display = 'block';
     document.getElementById('adminRecords').style.display = 'none';
-    document.getElementById('changePwBox').style.display = 'none';
     document.getElementById('adminPwInput').value = '';
     document.getElementById('adminPwErr').style.display = 'none';
     setTimeout(() => document.getElementById('adminPwInput').focus(), 100);
@@ -1117,7 +1092,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function checkAdminPw() {
     const pw = document.getElementById('adminPwInput').value;
-    if (pw === getAdminPw()) {
+    if (pw === ADMIN_PW) {
       document.getElementById('adminLoginBox').style.display = 'none';
       document.getElementById('adminRecords').style.display = 'block';
       loadAdminRecords();
@@ -1126,174 +1101,66 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  function showChangePw() {
-    const box = document.getElementById('changePwBox');
-    box.style.display = box.style.display === 'none' ? 'block' : 'none';
-    document.getElementById('oldPwInput').value = '';
-    document.getElementById('newPwInput').value = '';
-    document.getElementById('newPwConfirm').value = '';
-    document.getElementById('changePwMsg').style.display = 'none';
-  }
+  // ===== ORDER RECORDS via Telegram getUpdates =====
+  const BOT_TOKEN_ADMIN = '8740633367:AAGTUHgB5En4ivrt-zZbD7rDpcVb6yNysEE';
 
-  function doChangePw() {
-    const oldPw = document.getElementById('oldPwInput').value;
-    const newPw = document.getElementById('newPwInput').value.trim();
-    const confirmPw = document.getElementById('newPwConfirm').value.trim();
-    const msg = document.getElementById('changePwMsg');
-
-    msg.style.display = 'block';
-    if (oldPw !== getAdminPw()) {
-      msg.style.color = '#e74c3c';
-      msg.textContent = '❌ လက်ရှိ Password မှားသည်';
-      return;
-    }
-    if (!newPw) {
-      msg.style.color = '#e74c3c';
-      msg.textContent = '❌ Password အသစ် ထည့်ပါ';
-      return;
-    }
-    if (newPw !== confirmPw) {
-      msg.style.color = '#e74c3c';
-      msg.textContent = '❌ Password အသစ် မတိုက်ဆိုင်ပါ';
-      return;
-    }
-    localStorage.setItem(ADMIN_PW_KEY, newPw);
-    msg.style.color = '#27ae60';
-    msg.textContent = '✅ Password ပြောင်းပြီးပါပြီ';
-    setTimeout(() => { document.getElementById('changePwBox').style.display = 'none'; }, 1500);
-  }
-
-  // ===== ORDER RECORDS via Telegram =====
-  const TG_BOT   = '8740633367:AAGTUHgB5En4ivrt-zZbD7rDpcVb6yNysEE';
-  const TG_CHAT  = '6023365006';
-  // Deleted order IDs stored locally so we can hide them in admin view
-  const DEL_KEY  = 'mfy_deleted_ids';
-
-  function getDeletedIds() {
-    return JSON.parse(localStorage.getItem(DEL_KEY) || '[]');
-  }
-  function addDeletedId(id) {
-    const ids = getDeletedIds();
-    ids.push(id);
-    localStorage.setItem(DEL_KEY, JSON.stringify(ids));
-  }
-
-  // Save order as a special formatted message to Telegram
   function saveOrderRecord(data) {
-    const tag = '🗂MFY_ORDER🗂';
-    const ts  = Date.now();
-    const text = `${tag}|ID:${ts}
+    const record = `📋 ORDER_RECORD
 ⏰ ${data.time}
-🎁 လက်ခံသူ: ${data.recipient || '—'}
-📦 Plan: ${data.planLabel}
-🎀 Occasion: ${data.occasion}
-📝 စာ: ${data.details || '—'}
-📲 ဆက်သွယ်ရန်: ${data.contact || '—'}
-📱 Acc: ${data.account}
-💰 ${parseInt(data.amount).toLocaleString()} ကျပ်`;
-
-    fetch(`https://api.telegram.org/bot${TG_BOT}/sendMessage`, {
+🎁 ${data.recipient || '—'}
+📦 ${data.planLabel}
+📱 ${data.account}
+🎀 ${data.occasion}
+📝 ${data.details || '—'}
+📲 ${data.contact || '—'}
+💰 ${data.amount} ကျပ်`;
+    fetch(`https://api.telegram.org/bot${BOT_TOKEN_ADMIN}/sendMessage`, {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ chat_id: TG_CHAT, text })
+      body: JSON.stringify({ chat_id: '6023365006', text: record })
     });
   }
 
   async function loadAdminRecords() {
-    const list    = document.getElementById('adminOrderList');
+    const list = document.getElementById('adminOrderList');
     const totalEl = document.getElementById('adminTotalAmt');
-    list.innerHTML = '<p style="text-align:center;color:var(--text-light);font-size:0.85rem;">⏳ မှတ်တမ်းများ ရယူနေသည်...</p>';
+    list.innerHTML = '<p style="text-align:center; color:var(--text-light); font-size:0.85rem;">⏳ မှတ်တမ်းများ ရယူနေသည်...</p>';
 
     try {
-      const res  = await fetch(`https://api.telegram.org/bot${TG_BOT}/getUpdates?limit=100`);
+      const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN_ADMIN}/getUpdates?limit=100&allowed_updates=["message"]`);
       const data = await res.json();
-      if (!data.ok) throw new Error('fail');
+      if (!data.ok) throw new Error('Failed');
 
-      const deletedIds = getDeletedIds();
-      const TAG = '🗂MFY_ORDER🗂';
-
-      // Parse order messages
-      const orders = [];
+      const records = [];
       (data.result || []).forEach(upd => {
         const txt = upd.message && upd.message.text;
-        if (!txt || !txt.startsWith(TAG)) return;
-        // Extract ID
-        const idMatch = txt.match(/ID:(\d+)/);
-        const id = idMatch ? parseInt(idMatch[1]) : 0;
-        if (deletedIds.includes(id)) return; // hidden (deleted)
-
-        // Parse lines
-        const lines = txt.split('
-');
-        const get = (prefix) => {
-          const l = lines.find(x => x.startsWith(prefix));
-          return l ? l.replace(prefix,'').trim() : '—';
-        };
-        const amtMatch = txt.match(/💰 ([\d,]+) ကျပ်/);
-        const amount = amtMatch ? parseInt(amtMatch[1].replace(/,/g,'')) : 0;
-
-        orders.push({
-          id,
-          time:      get('⏰ '),
-          recipient: get('🎁 လက်ခံသူ: '),
-          plan:      get('📦 Plan: '),
-          occasion:  get('🎀 Occasion: '),
-          details:   get('📝 စာ: '),
-          contact:   get('📲 ဆက်သွယ်ရန်: '),
-          account:   get('📱 Acc: '),
-          amount
-        });
+        if (txt && txt.startsWith('📋 ORDER_RECORD')) {
+          records.push(txt);
+        }
       });
 
-      if (orders.length === 0) {
-        list.innerHTML = '<p style="text-align:center;color:var(--text-light);font-size:0.85rem;">မှတ်တမ်း မရှိသေးပါ</p>';
+      if (records.length === 0) {
+        list.innerHTML = '<p style="text-align:center; color:var(--text-light); font-size:0.85rem;">မှတ်တမ်း မရှိသေးပါ</p>';
         totalEl.textContent = '0 ကျပ်';
         return;
       }
 
       let total = 0;
-      // Show newest first
-      list.innerHTML = [...orders].reverse().map((o, i) => {
-        total += o.amount;
-        return `<div class="order-record" id="ord_${o.id}">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
-            <strong>#${orders.length - i} &nbsp;⏰ ${o.time}</strong>
-            <button onclick="deleteOrder(${o.id})" style="background:#fff0f0;border:1px solid #f5a8a8;color:#c0392b;border-radius:50px;padding:0.2rem 0.7rem;font-size:0.75rem;cursor:pointer;">🗑 ဖျက်</button>
-          </div>
-          🎁 ${o.recipient}<br>
-          📦 ${o.plan}<br>
-          🎀 ${o.occasion}<br>
-          📝 ${o.details}<br>
-          📲 ${o.contact}<br>
-          📱 ${o.account}<br>
-          <strong style="color:var(--pink-400);">💰 ${o.amount.toLocaleString()} ကျပ်</strong>
-        </div>`;
+      list.innerHTML = records.map((r, i) => {
+        const amtMatch = r.match(/💰 ([\d,]+) ကျပ်/);
+        if (amtMatch) total += parseInt(amtMatch[1].replace(',','')) || 0;
+        const lines = r.split('\n').slice(1).join('<br>');
+        return `<div class="order-record"><strong>#${i+1}</strong><br>${lines}</div>`;
       }).join('');
 
       totalEl.textContent = total.toLocaleString() + ' ကျပ်';
-
     } catch(e) {
-      list.innerHTML = '<p style="text-align:center;color:#e74c3c;font-size:0.85rem;">⚠️ မှတ်တမ်း ရယူမရပါ — ပြန်ကြိုးစားပါ</p>';
+      list.innerHTML = '<p style="text-align:center; color:#e74c3c; font-size:0.85rem;">⚠️ မှတ်တမ်း ရယူမရပါ — ပြန်ကြိုးစားပါ</p>';
     }
   }
 
-  function deleteOrder(id) {
-    if (!confirm('ဤ Order ကို ဖျက်မည်လား?')) return;
-    addDeletedId(id);
-    const el = document.getElementById('ord_' + id);
-    if (el) el.remove();
-    // Recalculate total
-    loadAdminRecords();
-  }
-
   function clearOrders() {
-    if (!confirm('Order မှတ်တမ်း အကုန် ဖျက်မည်လား?')) return;
-    // Mark all currently shown orders as deleted
-    document.querySelectorAll('.order-record').forEach(el => {
-      const id = parseInt(el.id.replace('ord_',''));
-      if (id) addDeletedId(id);
-    });
-    loadAdminRecords();
+    alert('ℹ️ မှတ်တမ်းများကို Telegram bot မှတဆင့် သိမ်းထားသောကြောင့် ဤနေရာမှ ဖျက်၍မရပါ။\nTelegram chat မှ ကြည့်ရှုနိုင်သည်။');
   }
 
   // Lock Soft Plan 10000 by default (only available for announce)
@@ -1466,19 +1333,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
       await sendMsg(`✅ Order ပြီးဆုံးပါပြီ — စစ်ဆေးပေးပါ 🙏`);
 
-      // Save to localStorage for admin panel
-      const planLabels = {'5000':'Basic 5,000','7000':'Standard 7,000','15000':'Pin VD 15,000','10000':'Soft 10,000','20000':'Pin VD 20,000'};
-      saveOrderRecord({
-        time: new Date().toLocaleString('my-MM'),
-        recipient: recipient,
-        planLabel: planLabels[plan] || plan,
-        account: account,
-        occasion: occasionText[occasion],
-        details: details,
-        contact: contact,
-        amount: plan
-      });
-
       showToast('✅ Order တင်ပြီးပါပြီ!');
 
       // ===== FORM CLEAR after success =====
@@ -1556,20 +1410,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   }
-
-
-  // Expose functions globally for inline onclick handlers
-  window.openAdmin = openAdmin;
-  window.closeAdmin = closeAdmin;
-  window.checkAdminPw = checkAdminPw;
-  window.clearOrders = clearOrders;
-  window.copyText = copyText;
-  window.deleteOrder = deleteOrder;
-  window.doChangePw = doChangePw;
-  window.handleOccasionChange = handleOccasionChange;
-  window.handleOrder = handleOrder;
-  window.showChangePw = showChangePw;
-}); // end DOMContentLoaded
 </script>
 </body>
-        </html>
+</html>
