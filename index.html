@@ -778,7 +778,7 @@
     <div class="sample-card">
       <span class="sample-emoji">🎀</span>
       <span class="sample-tag tag-birthday">Pin VD</span>
-      <p class="sample-text">Pin VD ယူရင် total 20,000 ကျသင့်ပါသည် 💜<br><br>📌 Pin လေးက လူရှိရင် 7 ရက် စောင့်ရပါမယ် — ပြည့်ရင် pin တင်ပေးပြီး ၁၂ နာရီအတွင်း အမြန်တင်ပေးပါသည် ✨</p>
+      <p class="sample-text">Pin VD ယူရင် total 15,000 ကျသင့်ပါသည် 💜<br><br>📌 Pin လေးက လူရှိရင် 7 ရက် စောင့်ရပါမယ် — ပြည့်ရင် pin တင်ပေးပြီး ၁၂ နာရီအတွင်း အမြန်တင်ပေးပါသည် ✨</p>
     </div>
     <div class="sample-card">
       <span class="sample-emoji">🔍</span>
@@ -1050,7 +1050,7 @@
   gap: 0.8rem;
   flex-wrap: wrap;
 ">
-  <span style="font-size: 0.95rem; font-family: 'Noto Sans Myanmar', sans-serif;">💌 <strong>@xinxin2233</strong></span>
+  <span style="font-size: 0.9rem; font-family: 'Noto Sans Myanmar', sans-serif;">📢 <strong>မင်မင်တို့ websiteမှာ ကြေငြာအပ်ချင်ရင် ဆက်သွယ်ရန်ကိုနှိပ်ပါ</strong></span>
   <a href="https://t.me/xinxin2233" target="_blank" style="
     background: white;
     color: #e0689a;
@@ -1104,8 +1104,6 @@
   const BOT_TOKEN_ADMIN = '8740633367:AAGTUHgB5En4ivrt-zZbD7rDpcVb6yNysEE';
 
   function saveOrderRecord(data) {
-    // No localStorage — orders are already sent to Telegram bot
-    // We just send a structured record message to the bot so it's retrievable
     const record = `📋 ORDER_RECORD
 ⏰ ${data.time}
 🎁 ${data.recipient || '—'}
@@ -1128,7 +1126,6 @@
     list.innerHTML = '<p style="text-align:center; color:var(--text-light); font-size:0.85rem;">⏳ မှတ်တမ်းများ ရယူနေသည်...</p>';
 
     try {
-      // Fetch up to 100 recent updates
       const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN_ADMIN}/getUpdates?limit=100&allowed_updates=["message"]`);
       const data = await res.json();
       if (!data.ok) throw new Error('Failed');
@@ -1149,11 +1146,9 @@
 
       let total = 0;
       list.innerHTML = records.map((r, i) => {
-        // Extract amount
         const amtMatch = r.match(/💰 ([\d,]+) ကျပ်/);
         if (amtMatch) total += parseInt(amtMatch[1].replace(',','')) || 0;
-        const lines = r.split('
-').slice(1).join('<br>');
+        const lines = r.split('\n').slice(1).join('<br>');
         return `<div class="order-record"><strong>#${i+1}</strong><br>${lines}</div>`;
       }).join('');
 
@@ -1164,8 +1159,7 @@
   }
 
   function clearOrders() {
-    alert('ℹ️ မှတ်တမ်းများကို Telegram bot မှတဆင့် သိမ်းထားသောကြောင့် ဤနေရာမှ ဖျက်၍မရပါ။
-Telegram chat မှ ကြည့်ရှုနိုင်သည်။');
+    alert('ℹ️ မှတ်တမ်းများကို Telegram bot မှတဆင့် သိမ်းထားသောကြောင့် ဤနေရာမှ ဖျက်၍မရပါ။\nTelegram chat မှ ကြည့်ရှုနိုင်သည်။');
   }
 
   // Lock Soft Plan 10000 by default (only available for announce)
@@ -1191,25 +1185,6 @@ Telegram chat မှ ကြည့်ရှုနိုင်သည်။');
     petalContainer.appendChild(petal);
   }
 
-  function quickCopyToTextarea(text, btn) {
-    const textarea = document.getElementById('details');
-    textarea.value = text;
-    textarea.focus();
-    navigator.clipboard.writeText(text).catch(() => {});
-    const original = btn.textContent;
-    btn.textContent = '✅ Copied!';
-    btn.style.background = '#d4f5d4';
-    btn.style.borderColor = '#a8d8a8';
-    btn.style.color = '#2d7a2d';
-    setTimeout(() => {
-      btn.textContent = original;
-      btn.style.background = '';
-      btn.style.borderColor = '';
-      btn.style.color = '';
-    }, 2000);
-  }
-
-  // Order handler
   function copyText(text, btn) {
     navigator.clipboard.writeText(text).then(() => {
       const original = btn.textContent;
@@ -1222,14 +1197,16 @@ Telegram chat မှ ကြည့်ရှုနိုင်သည်။');
     });
   }
 
+  // Modified logic for Find/Announce
   function handleOccasionChange(val) {
     const planSelect = document.getElementById('plan');
     const occasionLabel = document.getElementById('occasionLabel');
     const recipientInput = document.getElementById('recipientName');
     const recipientLabel = document.getElementById('recipientLabel');
+    
     const labels = {
       'birthday': '🎂 မွေးနေ့',
-      'love': '💌 ချောချင်တာ / ရင်ဖွင့်ချင်တာ',
+      'love': '💌 ချော့ချင်တာ / ရင်ဖွင့်ချင်တာ',
       'friend': '💜 သူငယ်ချင်းအတွက်',
       'apology': '🥺 တောင်းပန်ချင်တာ',
       'find': '🔍 လူရှာ / Acc ရှာ',
@@ -1238,68 +1215,48 @@ Telegram chat မှ ကြည့်ရှုနိုင်သည်။');
     };
     occasionLabel.textContent = val ? labels[val] + ' *' : 'Occasion / အကြောင်းအရာ *';
 
-    const opt2000 = planSelect.querySelector('option[value="2000"]');
-    const opt3000 = planSelect.querySelector('option[value="3000"]');
-
-    // Get all options to lock/unlock
     const allOpts = planSelect.querySelectorAll('option');
 
-    // Helper: restore Pin VD option to 15000
     const restorePin = () => {
-      const p20 = planSelect.querySelector('option[value="20000"]');
-      if (p20) { p20.value = '15000'; p20.textContent = '🎀 Pin VD — 15,000 ကျပ်'; }
+      const pOpt = planSelect.querySelector('option[value="20000"]') || planSelect.querySelector('option[value="15000"]');
+      if (pOpt) { pOpt.value = '15000'; pOpt.textContent = '🎀 Pin VD — 15,000 ကျပ်'; }
     };
 
-    if (val === 'find') {
-      // Restore pin first, then lock 2000, 3000, 10000; allow only 5000, 7000, 15000
-      restorePin();
-      allOpts.forEach(o => {
-        const allowed = ['', '5000', '7000', '15000'];
-        o.disabled = !allowed.includes(o.value);
-      });
-      planSelect.value = '5000';
-      planSelect.style.borderColor = '#9b7be8';
-      planSelect.style.color = '#6a3fa0';
+    if (val === 'find' || val === 'announce') {
+      // Disable recipient input
       recipientInput.disabled = true;
       recipientInput.value = '';
-      recipientInput.placeholder = '🔍 လူရှာ plan တွင် မလိုအပ်ပါ';
-      recipientInput.style.background = '#f5f0ff';
-      recipientInput.style.color = '#9b7be8';
-      recipientInput.style.borderColor = '#d8c8f8';
-      recipientLabel.textContent = 'လက်ခံသူ Username (လူရှာ plan — မလိုအပ်ပါ)';
-    } else if (val === 'announce') {
-      // Pin VD becomes 20000, lock 2000, 3000, 5000, 7000; allow 10000 + 20000 only
-      const pinOpt = planSelect.querySelector('option[value="15000"]');
-      if (pinOpt) { pinOpt.value = '20000'; pinOpt.textContent = '🎀 Pin VD — 20,000 ကျပ်'; }
-      allOpts.forEach(o => {
-        const locked = ['2000', '3000', '5000', '7000'];
-        o.disabled = locked.includes(o.value);
-      });
-      planSelect.value = '10000';
-      planSelect.style.borderColor = '#e0689a';
-      planSelect.style.color = '#b8456e';
-      recipientInput.disabled = true;
-      recipientInput.value = '';
-      recipientInput.placeholder = '📢 ကြေငြာ plan တွင် မလိုအပ်ပါ';
-      recipientInput.style.background = '#fff3ed';
-      recipientInput.style.color = '#f09060';
-      recipientInput.style.borderColor = '#ffd4b8';
-      recipientLabel.textContent = 'လက်ခံသူ Username (ကြေငြာ plan — မလိုအပ်ပါ)';
+      recipientInput.placeholder = 'ဤနေရာတွင် ဖြည့်စွက်ရန်မလိုပါ';
+      recipientInput.style.background = '#f5f5f5';
+      recipientLabel.textContent = labels[val] + ' (လက်ခံသူအမည် ထည့်စရာမလိုပါ)';
+
+      if (val === 'find') {
+          restorePin();
+          allOpts.forEach(o => {
+            const allowed = ['5000', '7000', '15000'];
+            o.disabled = o.value !== '' && !allowed.includes(o.value);
+          });
+          planSelect.value = '5000';
+      } else {
+          const pinOpt = planSelect.querySelector('option[value="15000"]');
+          if (pinOpt) { pinOpt.value = '20000'; pinOpt.textContent = '🎀 Pin VD — 20,000 ကျပ်'; }
+          allOpts.forEach(o => {
+            const allowed = ['10000', '20000'];
+            o.disabled = o.value !== '' && !allowed.includes(o.value);
+          });
+          planSelect.value = '10000';
+      }
     } else {
-      // Default: restore pin to 15000, unlock all except 10000
+      // Reset to default
+      recipientInput.disabled = false;
+      recipientInput.placeholder = '@username';
+      recipientInput.style.background = '';
+      recipientLabel.textContent = 'လက်ခံသူ TikTok / Telegram Username *';
       restorePin();
       allOpts.forEach(o => {
         o.disabled = (o.value === '10000');
       });
       if (planSelect.value === '10000' || planSelect.value === '20000') planSelect.value = '';
-      planSelect.style.borderColor = '';
-      planSelect.style.color = '';
-      recipientInput.disabled = false;
-      recipientInput.placeholder = '@username';
-      recipientInput.style.background = '';
-      recipientInput.style.color = '';
-      recipientInput.style.borderColor = '';
-      recipientLabel.textContent = 'လက်ခံသူ TikTok / Telegram Username *';
     }
   }
 
@@ -1310,14 +1267,15 @@ Telegram chat မှ ကြည့်ရှုနိုင်သည်။');
     const account = document.getElementById('account').value;
     const payslip = document.getElementById('payslip').files[0];
 
-    const isNoRecipient = occasion === 'find' || occasion === 'announce';
+    const isNoRecipient = (occasion === 'find' || occasion === 'announce');
+
     if ((!recipient && !isNoRecipient) || !plan || !occasion || !account) {
       alert('⚠️ အချက်အလက်များ အားလုံးဖြည့်ပါ');
       return;
     }
 
     if (!payslip) {
-      alert('⚠️ ငွေလွဲပြေစာ ပုံ ထည့်ပါ — မထည့်ပါက order မတင်နိုင်ပါ');
+      alert('⚠️ ငွေလွဲပြေစာ ပုံ ထည့်ပါ');
       return;
     }
 
@@ -1327,27 +1285,9 @@ Telegram chat မှ ကြည့်ရှုနိုင်သည်။');
     const photo2 = document.getElementById('photo2').files[0];
 
     const occasionText = {
-      'birthday': '🎂 မွေးနေ့',
-      'love': '💌 ချော့ချင်တာ / ရင်ဖွင့်ချင်တာ',
-      'friend': '💜 သူငယ်ချင်းအတွက်',
-      'apology': '🥺 တောင်းပန်ချင်တာ',
-      'find': '🔍 လူရှာချင်တာ',
-      'announce': '📢 ကြေငြာအပ်ချင်တာ',
-      'other': '✨ အခြား'
+      'birthday': '🎂 မွေးနေ့', 'love': '💌 ချော့ချင်တာ', 'friend': '💜 သူငယ်ချင်း', 
+      'apology': '🥺 တောင်းပန်တာ', 'find': '🔍 လူရှာ', 'announce': '📢 ကြေငြာ', 'other': '✨ အခြား'
     };
-
-    const planLabel = plan === '2000' ? '🌷 Mini Plan (2000 ကျပ်)' : plan === '3000' ? '🌸 Soft Plan (3000 ကျပ်)' : plan === '5000' ? '💜 Soft Plan (5000 ကျပ်)' : plan === '7000' ? '⚡ Fast Plan (7000 ကျပ်)' : plan === '10000' ? '🌟 Soft Plan (10000 ကျပ်)' : plan === '20000' ? '🎀 Pin VD (20000 ကျပ် — ကြေငြာ)' : '🎀 Pin VD (15000 ကျပ်)';
-
-    // တစ်ခုချင်းစီ ခွဲပြီး ပို့မည့် messages
-    const messages = [
-      `💌 New Order — Message for You`,
-      `🎁 လက်ခံသူ Username:\n${recipient || '—'}`,
-      `📦 Plan:\n${planLabel}`,
-      `📱 Video တင်မည့် Acc:\n${account}`,
-      `🎀 Occasion:\n${occasionText[occasion] || occasion}`,
-      `📝 အချက်အလက်:\n${details || '—'}`,
-      `📲 ဆက်သွယ်ရမည့် Username:\n${contact || '—'}`
-    ];
 
     const BOT_TOKEN = '8740633367:AAGTUHgB5En4ivrt-zZbD7rDpcVb6yNysEE';
     const CHAT_ID = '6023365006';
@@ -1355,81 +1295,36 @@ Telegram chat မှ ကြည့်ရှုနိုင်သည်။');
     const btn = document.querySelector('.form-submit');
     btn.disabled = true;
     btn.textContent = '⏳ ပို့နေသည်...';
-    const waitMsg = document.getElementById('waitMsg');
-    waitMsg.style.display = 'block';
-
-    const sendMsg = async (text) => {
-      const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: CHAT_ID, text })
-      });
-      const data = await res.json();
-      if (!data.ok) throw new Error('Message failed');
-    };
+    document.getElementById('waitMsg').style.display = 'block';
 
     try {
-      for (const m of messages) {
-        await sendMsg(m);
-      }
+      const summary = `💌 New Order\n🎁 လက်ခံသူ: ${recipient || 'N/A'}\n📦 Plan: ${plan}\n🎀 အကြောင်းအရာ: ${occasionText[occasion]}\n📝 အချက်အလက်: ${details}\n📲 ဆက်သွယ်ရန်: ${contact}`;
+      
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: CHAT_ID, text: summary })
+      });
 
-      const sendFile = async (file, caption) => {
+      const sendFile = async (file, cap) => {
         const fd = new FormData();
         fd.append('chat_id', CHAT_ID);
-        fd.append('caption', caption);
-        // Try as photo first, fallback to document for large files
         fd.append('photo', file);
-        const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-          method: 'POST', body: fd
-        });
-        const data = await res.json();
-        if (!data.ok) {
-          // Fallback: send as document
-          const fd2 = new FormData();
-          fd2.append('chat_id', CHAT_ID);
-          fd2.append('caption', caption);
-          fd2.append('document', file);
-          await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, {
-            method: 'POST', body: fd2
-          });
-        }
+        fd.append('caption', cap);
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: fd });
       };
 
-      await sendFile(payslip, '🧾 ငွေလွဲပြေစာ');
-      if (photo1) await sendFile(photo1, '📸 Acc Profile / လူပုံ ၁');
-      if (photo2) await sendFile(photo2, '📸 Acc Profile / လူပုံ ၂');
+      if (payslip) await sendFile(payslip, '🧾 ပြေစာ');
+      if (photo1) await sendFile(photo1, '📸 ပုံ ၁');
+      if (photo2) await sendFile(photo2, '📸 ပုံ ၂');
 
-      showToast('✅ Order တင်ပြီးပါပြီ! 💜 ဒီလို အားပေးမှုတွက် ကျေးဇူးတင်ပါတယ် 🌸 မကြာမီ @xinxin2233 ဆက်သွယ်ပေးပါမည် 💌');
-
-      // Save to admin records
-      const planLabels = { '2000':'🌷 Mini Plan (2000 ကျပ်)', '3000':'🌸 Soft Plan (3000 ကျပ်)', '5000':'💜 Soft Plan (5000 ကျပ်)', '7000':'⚡ Fast Plan (7000 ကျပ်)', '10000':'🌟 Soft Plan (10000 ကျပ်)', '15000':'🎀 Pin VD (15000 ကျပ်)', '20000':'🎀 Pin VD (20000 ကျပ် — ကြေငြာ)' };
-      const now = new Date();
-      const timeStr = now.toLocaleDateString('my-MM') + ' ' + now.toLocaleTimeString('my-MM', {hour:'2-digit', minute:'2-digit'});
-      saveOrderRecord({
-        time: timeStr,
-        recipient: recipient,
-        planLabel: planLabels[plan] || plan,
-        amount: parseInt(plan) || 0,
-        account: account,
-        occasion: occasionText[occasion] || occasion,
-        details: details,
-        contact: contact
-      });
-      document.getElementById('recipientName').value = '';
-      document.getElementById('plan').value = '';
-      document.getElementById('account').value = '';
-      document.getElementById('occasion').value = '';
-      document.getElementById('details').value = '';
-      document.getElementById('contact').value = '';
-      document.getElementById('photo1').value = '';
-      document.getElementById('photo2').value = '';
-      document.getElementById('payslip').value = '';
+      showToast('✅ Order တင်ပြီးပါပြီ!');
     } catch(e) {
-      showToast('⚠️ တစ်ခုခုမှားသွားတယ်၊ @xinxin2233 ကို တိုက်ရိုက်ဆက်သွယ်ပါ');
+      showToast('⚠️ ချို့ယွင်းချက်ရှိနေပါသည်');
     } finally {
       btn.disabled = false;
       btn.textContent = '💌 မှာယူမည် — @xinxin2233 ဆက်သွယ်ရန်';
-      waitMsg.style.display = 'none';
+      document.getElementById('waitMsg').style.display = 'none';
     }
   }
 
@@ -1439,16 +1334,6 @@ Telegram chat မှ ကြည့်ရှုနိုင်သည်။');
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 5000);
   }
-
-  document.querySelectorAll('a[href^="#"]').forEach(a => {
-    a.addEventListener('click', e => {
-      const target = document.querySelector(a.getAttribute('href'));
-      if (target) {
-        e.preventDefault();
-        target.scrollIntoView({ behavior: 'smooth' });
-      }
-    });
-  });
 
   function smoothScrollTo(id) {
     const el = document.getElementById(id);
