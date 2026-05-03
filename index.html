@@ -557,9 +557,134 @@
     .form-row { grid-template-columns: 1fr; }
     .nav-links { display: none; }
   }
+
+  /* ===== ADMIN PANEL ===== */
+  #adminBtn {
+    position: fixed;
+    top: 0; right: 0;
+    width: 50px; height: 50px;
+    z-index: 300;
+    background: transparent;
+    border: none;
+    cursor: default;
+    opacity: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #adminOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 400;
+    align-items: center;
+    justify-content: center;
+  }
+  #adminOverlay.open { display: flex; }
+
+  #adminPanel {
+    background: #fff;
+    border-radius: 20px;
+    width: min(96vw, 560px);
+    max-height: 88vh;
+    overflow-y: auto;
+    padding: 1.5rem;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    position: relative;
+  }
+
+  #adminPanel h2 {
+    font-family: 'Playfair Display', serif;
+    color: var(--text-dark);
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+
+  #adminLoginBox { text-align: center; }
+  #adminLoginBox input {
+    width: 100%; padding: 0.7rem 1rem;
+    border: 1.5px solid var(--pink-200);
+    border-radius: 12px;
+    font-size: 1rem;
+    margin-bottom: 0.7rem;
+    outline: none;
+  }
+  #adminLoginBox input:focus { border-color: var(--pink-400); }
+  #adminLoginBox button {
+    background: linear-gradient(135deg, var(--pink-400), var(--lavender-400));
+    color: white; border: none;
+    border-radius: 50px; padding: 0.6rem 2rem;
+    font-size: 0.95rem; cursor: pointer;
+  }
+
+  .admin-close {
+    position: absolute; top: 12px; right: 14px;
+    background: none; border: none;
+    font-size: 1.4rem; cursor: pointer; color: var(--text-light);
+  }
+
+  .order-record {
+    border: 1.5px solid var(--pink-100);
+    border-radius: 14px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 0.8rem;
+    font-size: 0.82rem;
+    color: var(--text-mid);
+    line-height: 1.9;
+    background: var(--pink-50);
+  }
+  .order-record strong { color: var(--text-dark); }
+
+  .admin-total {
+    background: linear-gradient(135deg, var(--pink-100), var(--lavender));
+    border-radius: 14px;
+    padding: 0.9rem 1.2rem;
+    margin-bottom: 1rem;
+    display: flex; align-items: center; justify-content: space-between;
+    font-weight: 600; color: var(--text-dark);
+  }
+  .admin-total span { color: var(--pink-400); font-size: 1.1rem; }
+
+  .admin-clear {
+    background: #fff0f0; border: 1px solid #f5a8a8;
+    color: #c0392b; border-radius: 50px;
+    padding: 0.4rem 1.2rem; font-size: 0.8rem;
+    cursor: pointer; float: right;
+  }
 </style>
 </head>
 <body>
+
+<!-- Admin Button (top right, subtle) -->
+<button id="adminBtn" onclick="openAdmin()"></button>
+
+<!-- Admin Overlay -->
+<div id="adminOverlay">
+  <div id="adminPanel">
+    <button class="admin-close" onclick="closeAdmin()">✕</button>
+
+    <!-- Login Box -->
+    <div id="adminLoginBox">
+      <h2>🔐 Admin မှတ်တမ်း</h2>
+      <p style="font-size:0.82rem; color:var(--text-light); margin-bottom:1rem;">Admin / Owner သာ ဝင်ရောက်ခွင့်ရှိသည်</p>
+      <input type="password" id="adminPwInput" placeholder="Password ထည့်ပါ" onkeydown="if(event.key==='Enter') checkAdminPw()">
+      <br>
+      <button onclick="checkAdminPw()">ဝင်ရောက်မည်</button>
+      <p id="adminPwErr" style="color:#e74c3c; font-size:0.8rem; margin-top:0.5rem; display:none;">Password မှားသည် ❌</p>
+    </div>
+
+    <!-- Records Box (hidden until login) -->
+    <div id="adminRecords" style="display:none;">
+      <h2>📋 Order မှတ်တမ်းများ</h2>
+      <div class="admin-total">
+        <span>💰 စုစုပေါင်း Order ကြေး</span>
+        <span id="adminTotalAmt">0 ကျပ်</span>
+      </div>
+      <button class="admin-clear" onclick="clearOrders()">🗑 မှတ်တမ်းဖျက်မည်</button>
+      <div style="clear:both; margin-bottom:0.8rem;"></div>
+      <div id="adminOrderList"></div>
+    </div>
+  </div>
+</div>
 
 <nav>
   <div class="nav-brand">𝑴𝒆𝒔𝒔𝒂𝒈𝒆 𝒇𝒐𝒓 𝒚𝒐𝒖ᥫ᭡</div>
@@ -787,6 +912,19 @@
     </div>
 
     <div class="form-group">
+      <label id="occasionLabel">Occasion / အကြောင်းအရာ *</label>
+      <select id="occasion" onchange="handleOccasionChange(this.value)">
+        <option value="">— ရွေးပါ —</option>
+        <option value="birthday">🎂 မွေးနေ့</option>
+        <option value="love">💌 ချော့ချင်တာ / ရင်ဖွင့်ချင်တာ</option>
+        <option value="friend">💜 သူငယ်ချင်းအတွက်</option>
+        <option value="apology">🥺 တောင်းပန်ချင်တာ</option>
+        <option value="find">🔍 လူရှာချင်တာ</option>
+        <option value="other">✨ အခြား</option>
+      </select>
+    </div>
+
+    <div class="form-group">
       <label>Plan ရွေးချယ်ပါ *</label>
       <select id="plan">
         <option value="">— Plan ရွေးပါ —</option>
@@ -808,20 +946,12 @@
     </div>
 
     <div class="form-group">
-      <label id="occasionLabel">Occasion / အကြောင်းအရာ *</label>
-      <select id="occasion" onchange="handleOccasionChange(this.value)">
-        <option value="">— ရွေးပါ —</option>
-        <option value="birthday">🎂 မွေးနေ့</option>
-        <option value="love">💌 ချော့ချင်တာ / ရင်ဖွင့်ချင်တာ</option>
-        <option value="friend">💜 သူငယ်ချင်းအတွက်</option>
-        <option value="apology">🥺 တောင်းပန်ချင်တာ</option>
-        <option value="find">🔍 လူရှာချင်တာ</option>
-        <option value="other">✨ အခြား</option>
-      </select>
-    </div>
-
-    <div class="form-group">
       <label>စာအပ်ရန် / ရေးသားရန် နေရာ</label>
+      <!-- Quick copy chips -->
+      <div style="display:flex; flex-wrap:wrap; gap:0.4rem; margin-bottom:0.5rem;">
+        <span style="font-size:0.75rem; color:var(--text-light); align-self:center;">💡 ထိပြီး copy:</span>
+        <button type="button" onclick="quickCopyToTextarea('သူချစ်တာ မင်းမဟုတ်ဘူး', this)" style="background:var(--pink-100); border:1px solid var(--pink-200); color:var(--pink-600); border-radius:20px; padding:0.2rem 0.7rem; font-size:0.78rem; cursor:pointer; font-family:'Noto Sans Myanmar',sans-serif;">သူချစ်တာ မင်းမဟုတ်ဘူး 📋</button>
+      </div>
       <textarea placeholder="ဥပမာ: သူချစ်တာ မင်းမဟုတ်ဘူး — ဘာမဆို ပြောလို့ရပါတယ် 💕" id="details"></textarea>
     </div>
 
@@ -907,7 +1037,79 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // Falling petals
+  // ===== ADMIN PANEL =====
+  const ADMIN_PW = '2862009H'; // password ပြောင်းချင်ရင် ဤနေရာမှာ ပြောင်းပါ
+
+  function openAdmin() {
+    document.getElementById('adminOverlay').classList.add('open');
+    document.getElementById('adminLoginBox').style.display = 'block';
+    document.getElementById('adminRecords').style.display = 'none';
+    document.getElementById('adminPwInput').value = '';
+    document.getElementById('adminPwErr').style.display = 'none';
+    setTimeout(() => document.getElementById('adminPwInput').focus(), 100);
+  }
+
+  function closeAdmin() {
+    document.getElementById('adminOverlay').classList.remove('open');
+  }
+
+  document.getElementById('adminOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeAdmin();
+  });
+
+  function checkAdminPw() {
+    const pw = document.getElementById('adminPwInput').value;
+    if (pw === ADMIN_PW) {
+      document.getElementById('adminLoginBox').style.display = 'none';
+      document.getElementById('adminRecords').style.display = 'block';
+      loadAdminRecords();
+    } else {
+      document.getElementById('adminPwErr').style.display = 'block';
+    }
+  }
+
+  function saveOrderRecord(data) {
+    const orders = JSON.parse(localStorage.getItem('mfy_orders') || '[]');
+    orders.push(data);
+    localStorage.setItem('mfy_orders', JSON.stringify(orders));
+  }
+
+  function loadAdminRecords() {
+    const orders = JSON.parse(localStorage.getItem('mfy_orders') || '[]');
+    const list = document.getElementById('adminOrderList');
+    const totalEl = document.getElementById('adminTotalAmt');
+
+    if (orders.length === 0) {
+      list.innerHTML = '<p style="text-align:center; color:var(--text-light); font-size:0.85rem;">မှတ်တမ်း မရှိသေးပါ</p>';
+      totalEl.textContent = '0 ကျပ်';
+      return;
+    }
+
+    let total = 0;
+    list.innerHTML = orders.map((o, i) => {
+      total += o.amount || 0;
+      return `<div class="order-record">
+        <strong>#${i+1} — ${o.time}</strong><br>
+        🎁 လက်ခံသူ: ${o.recipient || '—'}<br>
+        📦 Plan: ${o.planLabel}<br>
+        📱 Acc: ${o.account}<br>
+        🎀 Occasion: ${o.occasion}<br>
+        📝 အချက်အလက်: ${o.details || '—'}<br>
+        📲 ဆက်သွယ်မည်: ${o.contact || '—'}
+      </div>`;
+    }).join('');
+
+    totalEl.textContent = total.toLocaleString() + ' ကျပ်';
+  }
+
+  function clearOrders() {
+    if (confirm('မှတ်တမ်းအားလုံး ဖျက်မည်လား?')) {
+      localStorage.removeItem('mfy_orders');
+      loadAdminRecords();
+    }
+  }
+
+  // ===== FALLING PETALS =====
   const petalContainer = document.getElementById('petals');
   const petalChars = ['🌸', '✨', '💜', '🌷', '💕', '⭐'];
   for (let i = 0; i < 15; i++) {
@@ -919,6 +1121,24 @@
     petal.style.animationDelay = (Math.random() * 10) + 's';
     petal.style.fontSize = (Math.random() * 1 + 0.8) + 'rem';
     petalContainer.appendChild(petal);
+  }
+
+  function quickCopyToTextarea(text, btn) {
+    const textarea = document.getElementById('details');
+    textarea.value = text;
+    textarea.focus();
+    navigator.clipboard.writeText(text).catch(() => {});
+    const original = btn.textContent;
+    btn.textContent = '✅ Copied!';
+    btn.style.background = '#d4f5d4';
+    btn.style.borderColor = '#a8d8a8';
+    btn.style.color = '#2d7a2d';
+    setTimeout(() => {
+      btn.textContent = original;
+      btn.style.background = '';
+      btn.style.borderColor = '';
+      btn.style.color = '';
+    }, 2000);
   }
 
   // Order handler
@@ -1058,6 +1278,21 @@
       if (photo2) await sendFile(photo2, '📸 Acc Profile / လူပုံ ၂');
 
       showToast('✅ Order တင်ပြီးပါပြီ! 💜 ဒီလို အားပေးမှုတွက် ကျေးဇူးတင်ပါတယ် 🌸 မကြာမီ @xinxin2233 ဆက်သွယ်ပေးပါမည် 💌');
+
+      // Save to admin records
+      const planLabels = { '2000':'🌷 Mini Plan (2000 ကျပ်)', '3000':'🌸 Soft Plan (3000 ကျပ်)', '5000':'💜 Soft Plan (5000 ကျပ်)', '15000':'🎀 Pin VD (15000 ကျပ်)' };
+      const now = new Date();
+      const timeStr = now.toLocaleDateString('my-MM') + ' ' + now.toLocaleTimeString('my-MM', {hour:'2-digit', minute:'2-digit'});
+      saveOrderRecord({
+        time: timeStr,
+        recipient: recipient,
+        planLabel: planLabels[plan] || plan,
+        amount: parseInt(plan) || 0,
+        account: account,
+        occasion: occasionText[occasion] || occasion,
+        details: details,
+        contact: contact
+      });
       document.getElementById('recipientName').value = '';
       document.getElementById('plan').value = '';
       document.getElementById('account').value = '';
