@@ -1251,7 +1251,7 @@ Telegram chat မှ ကြည့်ရှုနိုင်သည်။');
     };
 
     if (val === 'find') {
-      // Restore pin first, then lock: allow 5000, 7000, 15000 only
+      // Restore pin first, then lock 2000, 3000, 10000; allow only 5000, 7000, 15000
       restorePin();
       allOpts.forEach(o => {
         const allowed = ['', '5000', '7000', '15000'];
@@ -1268,12 +1268,12 @@ Telegram chat မှ ကြည့်ရှုနိုင်သည်။');
       recipientInput.style.borderColor = '#d8c8f8';
       recipientLabel.textContent = 'လက်ခံသူ Username (လူရှာ plan — မလိုအပ်ပါ)';
     } else if (val === 'announce') {
-      // Pin VD becomes 20000, allow 10000 + 20000 only
+      // Pin VD becomes 20000, lock 2000, 3000, 5000, 7000; allow 10000 + 20000 only
       const pinOpt = planSelect.querySelector('option[value="15000"]');
       if (pinOpt) { pinOpt.value = '20000'; pinOpt.textContent = '🎀 Pin VD — 20,000 ကျပ်'; }
       allOpts.forEach(o => {
-        const allowed = ['', '10000', '20000'];
-        o.disabled = !allowed.includes(o.value);
+        const locked = ['2000', '3000', '5000', '7000'];
+        o.disabled = locked.includes(o.value);
       });
       planSelect.value = '10000';
       planSelect.style.borderColor = '#e0689a';
@@ -1286,7 +1286,7 @@ Telegram chat မှ ကြည့်ရှုနိုင်သည်။');
       recipientInput.style.borderColor = '#ffd4b8';
       recipientLabel.textContent = 'လက်ခံသူ Username (ကြေငြာ plan — မလိုအပ်ပါ)';
     } else {
-      // Default: restore pin to 15000, lock 10000 only, unlock rest
+      // Default: restore pin to 15000, unlock all except 10000
       restorePin();
       allOpts.forEach(o => {
         o.disabled = (o.value === '10000');
