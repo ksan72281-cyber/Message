@@ -755,7 +755,13 @@
 </head>
 <body>
 
-<!-- Admin Button (top right, subtle) -->
+<!-- ===== MAINTENANCE OVERLAY ===== -->
+<div id="maintenanceOverlay" style="display:none; position:fixed; inset:0; background:linear-gradient(160deg,#fdf0f5,#f0eaff,#fff3ed); z-index:9999; align-items:center; justify-content:center; flex-direction:column; text-align:center; padding:2rem;">
+  <div style="font-size:4rem; margin-bottom:1rem;">🛠️</div>
+  <h2 style="font-family:'Playfair Display',serif; font-size:1.8rem; color:#3d2b3d; margin-bottom:0.8rem;">Website ပြုပြင်နေပါသည်</h2>
+  <p style="font-size:1rem; color:#7a5a7a; margin-bottom:1.5rem; line-height:1.8;">ယာယီပိတ်ထားပါသည် — မကြာမီပြန်ဖွင့်ပါမည် 💜</p>
+  <a href="https://t.me/xinxin2233" target="_blank" style="display:inline-block; background:linear-gradient(135deg,#e0689a,#9b7be8); color:white; border-radius:50px; padding:0.85rem 2rem; font-family:'Noto Sans Myanmar',sans-serif; font-size:0.95rem; text-decoration:none; box-shadow:0 4px 20px rgba(224,104,154,0.3);">📲 @xinxin2233 မှာ ဆက်သွယ်ရန်</a>
+</div>
 <button id="adminBtn" onclick="openAdmin()"></button>
 
 <!-- ===== USER AUTH MODAL ===== -->
@@ -825,6 +831,15 @@
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
         <h2 style="margin:0;">📋 Order မှတ်တမ်း</h2>
         <button onclick="showChangePw()" style="background:var(--lavender); border:none; border-radius:50px; padding:0.3rem 0.9rem; font-size:0.78rem; color:var(--lavender-400); cursor:pointer;">🔑 PW ပြောင်း</button>
+      </div>
+
+      <!-- Maintenance Toggle -->
+      <div id="maintenanceToggleBox" style="background:linear-gradient(135deg,#fff3ed,#fdf0f5); border:1.5px solid var(--peach-200); border-radius:14px; padding:0.8rem 1rem; margin-bottom:1rem; display:flex; align-items:center; justify-content:space-between; gap:0.5rem;">
+        <div>
+          <p style="font-size:0.85rem; font-weight:600; color:var(--text-dark); margin:0;">🛠️ Website ပိတ်/ဖွင့်</p>
+          <p id="maintenanceStatus" style="font-size:0.75rem; color:var(--text-mid); margin:0.2rem 0 0;">ဖွင့်ထားသည် ✅</p>
+        </div>
+        <button id="maintenanceBtn" onclick="toggleMaintenance()" style="background:#e74c3c; color:white; border:none; border-radius:50px; padding:0.45rem 1.2rem; font-size:0.82rem; font-family:'Noto Sans Myanmar',sans-serif; cursor:pointer;">🔴 ပိတ်မည်</button>
       </div>
 
       <!-- Change PW box -->
@@ -1191,8 +1206,8 @@
       <textarea placeholder="ဥပမာ: သူချစ်တာ မင်းမဟုတ်ဘူး — ဘာမဆို ပြောလို့ရပါတယ် 💕" id="details"></textarea>
     </div>
 
-    <div class="form-group">
-      <label>TikTok / Telegram သင့် Username ပေးပို့ရန် (ပြန်ဆက်သွယ်ရန်)</label>
+    <div class="form-group" id="contactGroup">
+      <label>TikTok / Telegram သင့် Username ပေးပို့ရန် (ပြန်ဆက်သွယ်ရန်) — <span style="color:var(--pink-400); font-weight:400;" id="contactHintLabel"></span></label>
       <input type="text" placeholder="@yourusername (ပြန်ဆက်သွယ်ရန်)" id="contact" oninput="checkContactMatch()">
       <p id="contactHint" style="font-size:0.78rem; color:var(--pink-400); margin-top:0.3rem; display:none;"></p>
     </div>
@@ -1330,6 +1345,21 @@ document.addEventListener('DOMContentLoaded', function() {
       if (gate) gate.style.display = 'none';
       if (formInner) formInner.style.display = 'block';
       if (orderLabel) orderLabel.textContent = isPhoneNumber(u) ? maskPhone(u) : u;
+
+      // Contact field: hide for phone users, show with hint for username users
+      const contactGroup = document.getElementById('contactGroup');
+      const contactHintLabel = document.getElementById('contactHintLabel');
+      if (contactGroup) {
+        if (isPhoneNumber(u)) {
+          contactGroup.style.display = 'none';
+          // Clear contact value so it doesn't interfere with order
+          const contactEl = document.getElementById('contact');
+          if (contactEl) contactEl.value = '';
+        } else {
+          contactGroup.style.display = 'block';
+          if (contactHintLabel) contactHintLabel.textContent = 'acc ဖွင့်တုန်းက username နှင့်တူတူထည့်ရန်';
+        }
+      }
     } else {
       badge.classList.remove('show');
       loginBtn.style.display = 'block';
@@ -1452,6 +1482,41 @@ document.addEventListener('DOMContentLoaded', function() {
     return localStorage.getItem(ADMIN_PW_KEY) || '2862009H';
   }
 
+  // ===== MAINTENANCE MODE =====
+  const MAINTENANCE_KEY = 'mfy_maintenance';
+
+  function isMaintenance() {
+    return localStorage.getItem(MAINTENANCE_KEY) === '1';
+  }
+
+  function applyMaintenance() {
+    const overlay = document.getElementById('maintenanceOverlay');
+    const btn = document.getElementById('maintenanceBtn');
+    const status = document.getElementById('maintenanceStatus');
+    if (isMaintenance()) {
+      overlay.style.display = 'flex';
+      if (btn) { btn.textContent = '🟢 ပြန်ဖွင့်မည်'; btn.style.background = '#27ae60'; }
+      if (status) status.textContent = 'ပိတ်ထားသည် 🔴';
+    } else {
+      overlay.style.display = 'none';
+      if (btn) { btn.textContent = '🔴 ပိတ်မည်'; btn.style.background = '#e74c3c'; }
+      if (status) status.textContent = 'ဖွင့်ထားသည် ✅';
+    }
+  }
+
+  function toggleMaintenance() {
+    if (isMaintenance()) {
+      localStorage.removeItem(MAINTENANCE_KEY);
+    } else {
+      localStorage.setItem(MAINTENANCE_KEY, '1');
+    }
+    applyMaintenance();
+  }
+  window.toggleMaintenance = toggleMaintenance;
+
+  // Apply on load
+  applyMaintenance();
+
   function openAdmin() {
     document.getElementById('adminOverlay').classList.add('open');
     document.getElementById('adminLoginBox').style.display = 'block';
@@ -1477,6 +1542,7 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('adminRecords').style.display = 'block';
       loadAdminRecords();
       loadAdminUsers();
+      applyMaintenance();
     } else {
       document.getElementById('adminPwErr').style.display = 'block';
     }
@@ -1833,8 +1899,8 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
-    // Contact must match logged-in username
-    if (contact) {
+    // Contact must match logged-in username (only for non-phone users)
+    if (contact && !isPhoneNumber(loggedUser)) {
       const normalize = s => s.toLowerCase().replace(/^@/, '');
       if (normalize(contact) !== normalize(loggedUser)) {
         alert('⚠️ ဆက်သွယ်ရန် username သည် သင့် account username နဲ့ တူရမည် — မတူပါက order မရပါ');
