@@ -1183,8 +1183,9 @@
     </div>
 
     <div class="form-group">
-      <label>TikTok / Telegram သင့် Username ပေးပို့ရန် (ပြန်ဆက်သွယ်ရန်)</label>
-      <input type="text" placeholder="@yourusername (ပြန်ဆက်သွယ်ရန်)" id="contact">
+      <label>TikTok / Telegram သင့် Username ပေးပို့ရန် (ပြန်ဆက်သွယ်ရန်) — <span style="color:var(--pink-400); font-weight:400;">acc ဖွင့်ရာတုန်းက username နဲ့တူတူထည့်ပါ</span></label>
+      <input type="text" placeholder="@yourusername (ပြန်ဆက်သွယ်ရန်)" id="contact" oninput="checkContactMatch()">
+      <p id="contactHint" style="font-size:0.78rem; color:var(--pink-400); margin-top:0.3rem; display:none;"></p>
     </div>
 
     <div class="form-group">
@@ -1301,11 +1302,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (u) {
       badge.classList.add('show');
-      document.getElementById('userBadgeName').textContent = u;
+      // Mask phone numbers in nav badge
+      const displayName = isPhoneNumber(u) ? maskPhone(u) : u;
+      document.getElementById('userBadgeName').textContent = displayName;
       loginBtn.style.display = 'none';
       if (gate) gate.style.display = 'none';
       if (formInner) formInner.style.display = 'block';
-      if (orderLabel) orderLabel.textContent = u;
+      if (orderLabel) orderLabel.textContent = isPhoneNumber(u) ? maskPhone(u) : u;
     } else {
       badge.classList.remove('show');
       loginBtn.style.display = 'block';
@@ -1321,7 +1324,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (u) {
       document.getElementById('authBox').style.display = 'none';
       document.getElementById('loggedInBox').style.display = 'block';
-      document.getElementById('loggedInName').textContent = '👋 မင်္ဂလာပါ, ' + u;
+      document.getElementById('loggedInName').textContent = '👋 မင်္ဂလာပါ, ' + (isPhoneNumber(u) ? maskPhone(u) : u);
     } else {
       document.getElementById('authBox').style.display = 'block';
       document.getElementById('loggedInBox').style.display = 'none';
@@ -1361,6 +1364,22 @@ document.addEventListener('DOMContentLoaded', function() {
     showToast('✅ Welcome, ' + username + '!');
   }
 
+  // Check if a string looks like a phone number (digits only, possibly starting with 09)
+  function isPhoneNumber(str) {
+    return /^\d+$/.test(str);
+  }
+
+  // Validate phone: must start with 09 and be exactly 11 digits
+  function isValidPhone(str) {
+    return /^09\d{9}$/.test(str);
+  }
+
+  // Mask phone: show last 3 digits, rest as ×
+  function maskPhone(phone) {
+    if (phone.length <= 3) return phone;
+    return '×'.repeat(phone.length - 3) + phone.slice(-3);
+  }
+
   function doRegister() {
     const username = document.getElementById('regUser').value.trim();
     const pw = document.getElementById('regPw').value;
@@ -1368,6 +1387,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const err = document.getElementById('registerErr');
 
     if (!username) { showAuthErr(err, '⚠️ Username ထည့်ပါ'); return; }
+
+    // Phone number validation
+    if (isPhoneNumber(username)) {
+      if (!isValidPhone(username)) {
+        showAuthErr(err, '❌ ဖုန်းနံပတ် 09 ဖြင့်စပြီး ဂဏန်း ၁၁ လုံးပြည့်ရပါမည် (ဥပမာ — 09xxxxxxxxx)');
+        return;
+      }
+    }
+
     if (!pw) { showAuthErr(err, '⚠️ Password ထည့်ပါ'); return; }
     if (pw !== confirm) { showAuthErr(err, '❌ Password မတိုက်ဆိုင်ပါ'); return; }
     if (pw.length < 4) { showAuthErr(err, '⚠️ Password အနည်းဆုံး ၄ လုံး'); return; }
@@ -1596,7 +1624,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <strong>#${orders.length - i} &nbsp;⏰ ${o.time}</strong>
             <button onclick="deleteOrder(${o.id})" style="background:#fff0f0;border:1px solid #f5a8a8;color:#c0392b;border-radius:50px;padding:0.2rem 0.7rem;font-size:0.75rem;cursor:pointer;">🗑 ဖျက်</button>
           </div>
-          <div style="margin-bottom:0.3rem;">👤 <strong>${o.loginUser}</strong> <span class="order-user-tag">Website User</span></div>
+          <div style="margin-bottom:0.3rem;">👤 <strong>${isPhoneNumber(o.loginUser) ? maskPhone(o.loginUser) : o.loginUser}</strong> <span class="order-user-tag">Website User</span></div>
           🎁 ${o.recipient}<br>
           📦 ${o.plan}<br>
           🎀 ${o.occasion}<br>
@@ -1718,6 +1746,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  function checkContactMatch() {
+    const loggedUser = currentUser();
+    if (!loggedUser) return;
+    const contactVal = document.getElementById('contact').value.trim();
+    const hint = document.getElementById('contactHint');
+    if (!contactVal) { hint.style.display = 'none'; return; }
+    // Compare case-insensitively, strip leading @ for comparison
+    const normalize = s => s.toLowerCase().replace(/^@/, '');
+    if (normalize(contactVal) !== normalize(loggedUser)) {
+      hint.style.color = '#e74c3c';
+      hint.textContent = '⚠️ သင့် acc username နဲ့ မတူပါ — မတူပါက order မရပါ';
+      hint.style.display = 'block';
+    } else {
+      hint.style.color = '#27ae60';
+      hint.textContent = '✅ Username တူပါသည်';
+      hint.style.display = 'block';
+    }
+  }
+  window.checkContactMatch = checkContactMatch;
+
   async function handleOrder() {
     const loggedUser = currentUser();
     if (!loggedUser) {
@@ -1736,6 +1784,15 @@ document.addEventListener('DOMContentLoaded', function() {
     if ((!recipient && !isNoRecipient) || !plan || !occasion || !account) {
       alert('⚠️ အချက်အလက်များ အားလုံးဖြည့်ပါ');
       return;
+    }
+
+    // Contact must match logged-in username
+    if (contact) {
+      const normalize = s => s.toLowerCase().replace(/^@/, '');
+      if (normalize(contact) !== normalize(loggedUser)) {
+        alert('⚠️ ဆက်သွယ်ရန် username သည် သင့် account username နဲ့ တူရမည် — မတူပါက order မရပါ');
+        return;
+      }
     }
 
     if (!payslip) {
