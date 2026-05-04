@@ -727,6 +727,13 @@
           <span style="font-size:0.88rem; font-weight:600; color:var(--text-dark);">🎰 ကံစမ်းမဲ လူစာရင်း</span>
           <button onclick="clearLuckyList()" style="background:#fff0f0; border:1px solid #f5a8a8; color:#c0392b; border-radius:50px; padding:0.25rem 0.8rem; font-size:0.76rem; cursor:pointer;">🗑 ဖျက်မည်</button>
         </div>
+
+        <!-- Manual Add Input -->
+        <div style="display:flex; gap:0.5rem; margin-bottom:0.8rem;">
+          <input type="text" id="manualLuckyInput" placeholder="Username ထည့်မည် (ဥပမာ @user1)" style="flex:1; padding:0.5rem 0.8rem; border:1.5px solid var(--pink-200); border-radius:10px; font-family:'Noto Sans Myanmar',sans-serif; font-size:0.85rem; outline:none;">
+          <button onclick="adminAddLucky()" style="background:linear-gradient(135deg,var(--pink-400),var(--lavender-400)); color:white; border:none; border-radius:50px; padding:0.4rem 1rem; font-size:0.82rem; cursor:pointer; white-space:nowrap;">➕ ထည့်မည်</button>
+        </div>
+
         <div id="adminLuckyList" style="font-size:0.85rem; color:var(--text-mid); line-height:2; margin-bottom:1.2rem;"></div>
 
         <!-- Divider -->
@@ -1416,6 +1423,26 @@ document.addEventListener('DOMContentLoaded', function() {
     renderAdminLucky(list);
   }
 
+  async function adminAddLucky() {
+    const input = document.getElementById('manualLuckyInput');
+    const username = input.value.trim();
+    if (!username) { alert('Username ထည့်ပါ'); return; }
+    input.disabled = true;
+    try {
+      const { list } = await fetchLuckyList();
+      list.push(username);
+      await saveLuckyList(list);
+      renderAdminLucky(list);
+      renderLuckyDraw(list);
+      input.value = '';
+      showToast('✅ ' + username + ' ထည့်ပြီးပါပြီ');
+    } catch(e) {
+      alert('⚠️ ထည့်မရပါ — ပြန်ကြိုးစားပါ');
+    } finally {
+      input.disabled = false;
+    }
+  }
+
   // ===== WINNERS (ကံထူးရှင်များ) =====
   // Stored as Telegram message: TAG_WINNERS|JSON
   const TAG_WINNERS = '🏆MFY_WINNERS🏆';
@@ -1551,33 +1578,13 @@ document.addEventListener('DOMContentLoaded', function() {
 📲 ဆက်သွယ်ရန်: ${data.contact || '—'}
 📱 Acc: ${data.account}
 💰 ${parseInt(data.amount).toLocaleString()} ကျပ်`;
-    // Send to group (cross-device readable via getUpdates)
+    // Send ONLY to Telegram group — visible on ALL devices/phones
     await tgSendGroup(text);
-
-    // Also save to localStorage as cache
-    const LS_KEY = 'mfy_orders_local';
-    const existing = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
-    existing.push({
-      id: ts,
-      time: data.time,
-      recipient: data.recipient || '—',
-      plan: data.planLabel,
-      occasion: data.occasion,
-      details: data.details || '—',
-      contact: data.contact || '—',
-      account: data.account,
-      amount: parseInt(data.amount)
-    });
-    localStorage.setItem(LS_KEY, JSON.stringify(existing));
   }
 
   async function deleteOrder(id) {
     if (!confirm('ဤ Order ကို ဖျက်မည်လား?')) return;
     addDelId(id);
-    // Also remove from localStorage
-    const LS_KEY = 'mfy_orders_local';
-    const existing = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
-    localStorage.setItem(LS_KEY, JSON.stringify(existing.filter(o => o.id !== id)));
     const el = document.getElementById('ord_' + id);
     if (el) el.remove();
     await loadAdminRecords();
@@ -1621,16 +1628,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       }
 
-      // Merge with localStorage cache (orders not yet in getUpdates)
-      const LS_KEY = 'mfy_orders_local';
-      const localOrders = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
-      for (const lo of localOrders) {
-        if (!orders.find(o => o.id === lo.id) && !delIds.includes(lo.id)) {
-          orders.push(lo);
-        }
-      }
-
-      // Sort by id ascending
+      // Sort by id ascending (Telegram-only, works on all devices)
       orders.sort((a, b) => a.id - b.id);
 
       if (orders.length === 0) {
@@ -1666,8 +1664,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   async function clearOrders() {
     if (!confirm('Order မှတ်တမ်း အကုန် ဖျက်မည်လား?')) return;
-    // Clear localStorage
-    localStorage.removeItem('mfy_orders_local');
     localStorage.removeItem(DEL_KEY);
     await loadAdminRecords();
   }
@@ -1963,6 +1959,7 @@ document.addEventListener('DOMContentLoaded', function() {
   window.openWinnersModal = openWinnersModal;
   window.closeWinnersModal = closeWinnersModal;
   window.saveWinners = saveWinners;
+  window.adminAddLucky = adminAddLucky;
 }); // end DOMContentLoaded
 </script>
 </body>
