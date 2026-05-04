@@ -1539,11 +1539,31 @@ document.addEventListener('DOMContentLoaded', function() {
 📱 Acc: ${data.account}
 💰 ${parseInt(data.amount).toLocaleString()} ကျပ်`;
     await tgSend(text);
+
+    // Also save to localStorage for reliable admin panel reading
+    const LS_KEY = 'mfy_orders_local';
+    const existing = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+    existing.push({
+      id: ts,
+      time: data.time,
+      recipient: data.recipient || '—',
+      plan: data.planLabel,
+      occasion: data.occasion,
+      details: data.details || '—',
+      contact: data.contact || '—',
+      account: data.account,
+      amount: parseInt(data.amount)
+    });
+    localStorage.setItem(LS_KEY, JSON.stringify(existing));
   }
 
   async function deleteOrder(id) {
     if (!confirm('ဤ Order ကို ဖျက်မည်လား?')) return;
     addDelId(id);
+    // Also remove from localStorage
+    const LS_KEY = 'mfy_orders_local';
+    const existing = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+    localStorage.setItem(LS_KEY, JSON.stringify(existing.filter(o => o.id !== id)));
     const el = document.getElementById('ord_' + id);
     if (el) el.remove();
     await loadAdminRecords();
@@ -1555,37 +1575,10 @@ document.addEventListener('DOMContentLoaded', function() {
     list.innerHTML = '<p style="text-align:center;color:var(--text-light);font-size:0.85rem;">⏳ မှတ်တမ်းများ ရယူနေသည်...</p>';
 
     try {
-      const updates = await tgGetUpdates();
       const delIds  = getDelIds();
-      const orders  = [];
-
-      for (const u of updates) {
-        const txt = u.message && u.message.text;
-        if (!txt || !txt.startsWith(TAG_ORDER)) continue;
-        const idMatch = txt.match(/ID:(\d+)/);
-        const id = idMatch ? parseInt(idMatch[1]) : 0;
-        if (delIds.includes(id)) continue;
-
-        const lines = txt.split('\n');
-        const get = (prefix) => {
-          const l = lines.find(x => x.startsWith(prefix));
-          return l ? l.replace(prefix, '').trim() : '—';
-        };
-        const amtMatch = txt.match(/💰 ([\d,]+) ကျပ်/);
-        const amount = amtMatch ? parseInt(amtMatch[1].replace(/,/g, '')) : 0;
-
-        orders.push({
-          id,
-          time:      get('⏰ '),
-          recipient: get('🎁 လက်ခံသူ: '),
-          plan:      get('📦 Plan: '),
-          occasion:  get('🎀 Occasion: '),
-          details:   get('📝 စာ: '),
-          contact:   get('📲 ဆက်သွယ်ရန်: '),
-          account:   get('📱 Acc: '),
-          amount
-        });
-      }
+      const LS_KEY = 'mfy_orders_local';
+      const allOrders = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+      const orders = allOrders.filter(o => !delIds.includes(o.id));
 
       if (orders.length === 0) {
         list.innerHTML = '<p style="text-align:center;color:var(--text-light);font-size:0.85rem;">မှတ်တမ်း မရှိသေးပါ</p>';
@@ -1595,7 +1588,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       let total = 0;
       list.innerHTML = [...orders].reverse().map((o, i) => {
-        total += o.amount;
+        total += (o.amount || 0);
         return `<div class="order-record" id="ord_${o.id}">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
             <strong>#${orders.length - i} &nbsp;⏰ ${o.time}</strong>
@@ -1607,7 +1600,7 @@ document.addEventListener('DOMContentLoaded', function() {
           📝 ${o.details}<br>
           📲 ${o.contact}<br>
           📱 ${o.account}<br>
-          <strong style="color:var(--pink-400);">💰 ${o.amount.toLocaleString()} ကျပ်</strong>
+          <strong style="color:var(--pink-400);">💰 ${(o.amount||0).toLocaleString()} ကျပ်</strong>
         </div>`;
       }).join('');
 
@@ -1620,11 +1613,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   async function clearOrders() {
     if (!confirm('Order မှတ်တမ်း အကုန် ဖျက်မည်လား?')) return;
-    // Mark all visible as deleted
-    document.querySelectorAll('.order-record').forEach(el => {
-      const id = parseInt(el.id.replace('ord_', ''));
-      if (id) addDelId(id);
-    });
+    // Clear localStorage
+    localStorage.removeItem('mfy_orders_local');
+    localStorage.removeItem(DEL_KEY);
     await loadAdminRecords();
   }
 
@@ -1763,11 +1754,23 @@ document.addEventListener('DOMContentLoaded', function() {
     if (stickyBar) stickyBar.style.display = 'none';
 
     const sendFile = async (file, cap) => {
+      // Try sendPhoto first
       const fd = new FormData();
       fd.append('chat_id', CID);
       fd.append('photo', file);
       fd.append('caption', cap);
-      await fetch(`https://api.telegram.org/bot${BOT}/sendPhoto`, { method: 'POST', body: fd });
+      const res = await fetch(`https://api.telegram.org/bot${BOT}/sendPhoto`, { method: 'POST', body: fd });
+      const resJson = await res.json();
+      if (!resJson.ok) {
+        // Fallback: sendDocument (works for any file type)
+        const fd2 = new FormData();
+        fd2.append('chat_id', CID);
+        fd2.append('document', file);
+        fd2.append('caption', cap);
+        const res2 = await fetch(`https://api.telegram.org/bot${BOT}/sendDocument`, { method: 'POST', body: fd2 });
+        const res2Json = await res2.json();
+        if (!res2Json.ok) throw new Error('ပုံ ပို့မရပါ: ' + (res2Json.description || ''));
+      }
     };
 
     try {
