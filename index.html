@@ -757,8 +757,7 @@
 
 <!-- ===== MAINTENANCE OVERLAY ===== -->
 <div id="maintenanceOverlay" style="display:none; position:fixed; inset:0; background:linear-gradient(160deg,#fdf0f5,#f0eaff,#fff3ed); z-index:9999; align-items:center; justify-content:center; flex-direction:column; text-align:center; padding:2rem;">
-  <!-- Hidden admin button top-right, above overlay -->
-  <button onclick="openAdmin()" style="position:fixed; top:0; right:0; width:60px; height:60px; background:transparent; border:none; cursor:default; opacity:0; z-index:10000; -webkit-tap-highlight-color:transparent;"></button>
+  <button onclick="openAdminDirect()" style="position:fixed; top:0; right:0; width:60px; height:60px; background:transparent; border:none; cursor:default; opacity:0; z-index:10000; -webkit-tap-highlight-color:transparent;"></button>
   <div style="font-size:4rem; margin-bottom:1rem;">🛠️</div>
   <h2 style="font-family:'Playfair Display',serif; font-size:1.8rem; color:#3d2b3d; margin-bottom:0.8rem;">Website ပြုပြင်နေပါသည်</h2>
   <p style="font-size:1rem; color:#7a5a7a; margin-bottom:1.5rem; line-height:1.8;">ယာယီပိတ်ထားပါသည် — မကြာမီပြန်ဖွင့်ပါမည် 💜</p>
@@ -1528,6 +1527,17 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('adminPwErr').style.display = 'none';
     setTimeout(() => document.getElementById('adminPwInput').focus(), 100);
   }
+
+  function openAdminDirect() {
+    document.getElementById('adminOverlay').classList.add('open');
+    document.getElementById('adminLoginBox').style.display = 'none';
+    document.getElementById('adminRecords').style.display = 'block';
+    document.getElementById('changePwBox').style.display = 'none';
+    loadAdminRecords();
+    loadAdminUsers();
+    applyMaintenance();
+  }
+  window.openAdminDirect = openAdminDirect;
 
   function closeAdmin() {
     document.getElementById('adminOverlay').classList.remove('open');
