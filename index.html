@@ -1180,7 +1180,7 @@
 
     <div class="form-group">
       <label>Plan ရွေးချယ်ပါ *</label>
-      <select id="plan">
+      <select id="plan" onchange="updateTotal()">
         <option value="">— Plan ရွေးပါ —</option>
         <option value="2000">🌷 Mini Plan — 2,000 ကျပ်</option>
         <option value="3000">🌸 Soft Plan — 3,000 ကျပ်</option>
@@ -1189,6 +1189,24 @@
         <option value="10000">🌟 Soft Plan — 10,000 ကျပ်</option>
         <option value="15000">🎀 Pin VD — 15,000 ကျပ်</option>
       </select>
+    </div>
+
+    <!-- ===== SONG ADDON ===== -->
+    <div class="form-group">
+      <label>🎵 သီချင်းထည့်မလား? <span style="color:var(--pink-400); font-weight:400;">(+2,000 ကျပ်)</span></label>
+      <div style="display:flex; gap:1rem;">
+        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:600; background:white; border:1.5px solid var(--pink-100); border-radius:12px; padding:0.7rem 1.2rem; flex:1; justify-content:center; transition:all 0.2s;" id="songYesLabel">
+          <input type="radio" name="songAddon" id="songYes" value="yes" onchange="toggleSongBox()" style="accent-color:var(--pink-400); width:16px; height:16px;">
+          ရွေးမယ်
+        </label>
+        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:600; background:var(--pink-50); border:1.5px solid var(--pink-400); border-radius:12px; padding:0.7rem 1.2rem; flex:1; justify-content:center; transition:all 0.2s;" id="songNoLabel">
+          <input type="radio" name="songAddon" id="songNo" value="no" onchange="toggleSongBox()" style="accent-color:var(--pink-400); width:16px; height:16px;" checked>
+          မရွေးဘူး
+        </label>
+      </div>
+      <div id="songBox" style="display:none; margin-top:0.8rem;">
+        <input type="text" id="songName" placeholder="သီချင်းအမည် ရေးပါ 🎵" style="width:100%; padding:0.8rem 1rem; border:1.5px solid var(--pink-400); border-radius:12px; font-family:'Noto Sans Myanmar',sans-serif; font-size:0.9rem; color:var(--text-dark); background:white; outline:none;">
+      </div>
     </div>
 
     <div class="form-group">
@@ -1237,8 +1255,16 @@
 
     <div class="form-group">
       <label>ငွေလွဲပြေစာ ပုံ 🧾 *</label>
+      <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.6rem;">
+        <button type="button" onclick="copyText('09422580742', this)" style="background:var(--pink-50); border:1px solid var(--pink-200); color:var(--pink-600); border-radius:20px; padding:0.25rem 0.75rem; font-size:0.75rem; cursor:pointer; font-family:'Noto Sans Myanmar',sans-serif;">KPay 09422580742 📋</button>
+        <button type="button" onclick="copyText('09259588212', this)" style="background:var(--lavender); border:1px solid var(--lavender-200); color:var(--lavender-400); border-radius:20px; padding:0.25rem 0.75rem; font-size:0.75rem; cursor:pointer; font-family:'Noto Sans Myanmar',sans-serif;">Wave 09259588212 📋</button>
+      </div>
       <input type="file" accept="image/*" id="payslip" style="padding:0.6rem 1rem; cursor:pointer;">
       <p style="font-size:0.8rem; color:var(--pink-400); margin-top:0.4rem;">⚠️ ငွေလွဲပြေစာ မထည့်ပါက order မတင်နိုင်ပါ</p>
+      <!-- TOTAL below payslip -->
+      <div id="totalBox" style="display:none; margin-top:0.7rem; background:linear-gradient(135deg,var(--pink-50),var(--lavender)); border:1.5px solid var(--pink-200); border-radius:12px; padding:0.7rem 1rem;">
+        <span id="totalAmount" style="font-size:1rem; font-weight:700; color:var(--pink-400);"></span>
+      </div>
     </div>
 
     <button class="form-submit" onclick="handleOrder()">
@@ -1918,6 +1944,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const photo1 = document.getElementById('photo1').files[0];
     const photo2 = document.getElementById('photo2').files[0];
 
+    // Song addon
+    const songYes = document.getElementById('songYes') && document.getElementById('songYes').checked;
+    const songName = songYes ? (document.getElementById('songName').value.trim()) : '';
+    const songAddonAmt = songYes ? 2000 : 0;
+    const totalAmt = (parseInt(plan) || 0) + songAddonAmt;
+
     if ((!recipient && !isNoRecipient) || !plan || !occasion || !account) {
       alert('⚠️ အချက်အလက်များ အားလုံးဖြည့်ပါ');
       return;
@@ -1974,6 +2006,8 @@ document.addEventListener('DOMContentLoaded', function() {
       await tgSend(`🆕 NEW ORDER လာပါပြီ ✨`);
       await tgSend(`🎁 လက်ခံသူ: ${recipient || 'N/A'}`);
       await tgSend(`📦 Plan: ${plan} ကျပ်`);
+      if (songYes) await tgSend(`🎵 သီချင်း: ${songName || '(မဖော်ပြ)'} — +2,000 ကျပ်`);
+      await tgSend(`💳 စုစုပေါင်း: ${totalAmt.toLocaleString()} ကျပ်`);
       await tgSend(`🎀 အကြောင်းအရာ: ${occasionText[occasion]}`);
       if (details) await tgSend(`📝 စာ / အချက်အလက်:\n${details}`);
       if (contact) await tgSend(`📲 ဆက်သွယ်ရန်: ${contact}`);
@@ -2010,6 +2044,13 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('account').value = '';
       document.getElementById('details').value = '';
       document.getElementById('contact').value = '';
+
+      // Reset song addon
+      const songNoEl = document.getElementById('songNo');
+      if (songNoEl) { songNoEl.checked = true; toggleSongBox(); }
+      const songNameEl = document.getElementById('songName');
+      if (songNameEl) songNameEl.value = '';
+      updateTotal();
 
       // Reset file inputs
       ['payslip','photo1','photo2'].forEach(id => {
@@ -2136,6 +2177,44 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   })();
+
+  function toggleSongBox() {
+    const yes = document.getElementById('songYes').checked;
+    const box = document.getElementById('songBox');
+    const yesLabel = document.getElementById('songYesLabel');
+    const noLabel = document.getElementById('songNoLabel');
+    box.style.display = yes ? 'block' : 'none';
+    // Yes selected
+    yesLabel.style.borderColor = yes ? 'var(--pink-400)' : 'var(--pink-100)';
+    yesLabel.style.background = yes ? 'var(--pink-50)' : 'white';
+    // No selected
+    noLabel.style.borderColor = !yes ? 'var(--pink-400)' : 'var(--pink-100)';
+    noLabel.style.background = !yes ? 'var(--pink-50)' : 'white';
+    updateTotal();
+  }
+  window.toggleSongBox = toggleSongBox;
+
+  function updateTotal() {
+    const planVal = parseInt(document.getElementById('plan').value) || 0;
+    const songAddon = document.getElementById('songYes') && document.getElementById('songYes').checked ? 2000 : 0;
+    const totalBox = document.getElementById('totalBox');
+    const totalAmount = document.getElementById('totalAmount');
+
+    if (planVal === 0) {
+      totalBox.style.display = 'none';
+      return;
+    }
+
+    const total = planVal + songAddon;
+    totalBox.style.display = 'block';
+
+    if (songAddon > 0) {
+      totalAmount.textContent = `💳 Plan ${planVal.toLocaleString()} + သီချင်း 2,000 = ${total.toLocaleString()} ကျပ်`;
+    } else {
+      totalAmount.textContent = `💳 စုစုပေါင်း ${total.toLocaleString()} ကျပ်`;
+    }
+  }
+  window.updateTotal = updateTotal;
 
   function smoothScrollTo(id) {
     const el = document.getElementById(id);
