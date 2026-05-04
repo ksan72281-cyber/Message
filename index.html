@@ -1444,48 +1444,67 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===== WINNERS (ကံထူးရှင်များ) =====
-  // Stored as Telegram message: TAG_WINNERS|JSON
+  // Winners stored in localStorage (primary) + Telegram (backup notification only)
   const TAG_WINNERS = '🏆MFY_WINNERS🏆';
-  const WINNERS_MSGID_KEY = 'mfy_winners_msgid';
+  const WINNERS_LS_KEY = 'mfy_winners_data';
 
-  function getWinnersMsgId() { return parseInt(localStorage.getItem(WINNERS_MSGID_KEY) || '0'); }
-  function setWinnersMsgId(id) { localStorage.setItem(WINNERS_MSGID_KEY, String(id)); }
+  function getWinnersLocal() {
+    try {
+      const raw = localStorage.getItem(WINNERS_LS_KEY);
+      if (!raw) return { winners: [], title: 'ကံထူးရှင်များ' };
+      return JSON.parse(raw);
+    } catch { return { winners: [], title: 'ကံထူးရှင်များ' }; }
+  }
+
+  function setWinnersLocal(data) {
+    localStorage.setItem(WINNERS_LS_KEY, JSON.stringify(data));
+  }
 
   async function fetchWinners() {
-    const msgs = await tgGetUpdates();
-    let found = null;
-    for (const msg of msgs) {
-      const txt = msg.text;
-      if (txt && txt.startsWith(TAG_WINNERS)) found = { msgId: msg.message_id, txt };
-    }
-    if (!found) return { msgId: 0, winners: [], title: 'ကံထူးရှင်များ' };
-    setWinnersMsgId(found.msgId);
+    // Primary: localStorage — always fast, works on same device
+    const local = getWinnersLocal();
+    // Also try Telegram to sync from another device (admin saved from different phone)
     try {
-      const json = found.txt.replace(TAG_WINNERS + '|', '');
-      const data = JSON.parse(json);
-      return { msgId: found.msgId, winners: data.winners || [], title: data.title || 'ကံထူးရှင်များ' };
-    } catch { return { msgId: found.msgId, winners: [], title: 'ကံထူးရှင်များ' }; }
+      const msgs = await tgGetUpdates();
+      let found = null;
+      for (const msg of msgs) {
+        const txt = msg.text;
+        if (txt && txt.startsWith(TAG_WINNERS)) found = txt;
+      }
+      if (found) {
+        const json = found.replace(TAG_WINNERS + '|', '');
+        const data = JSON.parse(json);
+        // Telegram version — update localStorage so user sees it too
+        setWinnersLocal(data);
+        return { winners: data.winners || [], title: data.title || 'ကံထူးရှင်များ' };
+      }
+    } catch {}
+    // Fallback to localStorage
+    return local;
   }
 
   async function saveWinners() {
     const rows = document.querySelectorAll('#winnersInputArea .winner-row');
-    const title = document.getElementById('winnersTitleInput') ? document.getElementById('winnersTitleInput').value.trim() : 'ကံထူးရှင်များ';
+    const titleInput = document.getElementById('winnersTitleInput');
+    const title = titleInput ? titleInput.value.trim() : 'ကံထူးရှင်များ';
     const winners = [];
     rows.forEach(row => {
       const name  = row.querySelector('.w-name').value.trim();
       const prize = row.querySelector('.w-prize').value.trim();
       if (name) winners.push({ name, prize });
     });
-    const text = TAG_WINNERS + '|' + JSON.stringify({ title, winners });
-    const msgId = getWinnersMsgId();
-    let savedId = msgId;
-    if (msgId) {
-      try { await tgEdit(msgId, text); }
-      catch { savedId = await tgSendGroup(text); if (savedId) setWinnersMsgId(savedId); }
-    } else {
-      savedId = await tgSendGroup(text);
-      if (savedId) setWinnersMsgId(savedId);
-    }
+
+    const data = { title, winners };
+
+    // 1) Save to localStorage immediately — users will see this on this device right away
+    setWinnersLocal(data);
+
+    // 2) Also send to Telegram group as backup (for cross-device sync)
+    try {
+      const text = TAG_WINNERS + '|' + JSON.stringify(data);
+      await tgSendGroup(text);
+    } catch {}
+
     const msg = document.getElementById('winnersSaveMsg');
     msg.style.display = 'block';
     msg.style.color = '#27ae60';
@@ -1512,37 +1531,46 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   async function loadAdminWinners() {
-    buildWinnersInputArea([], '');
+    // Load from localStorage first (instant), then try Telegram sync
+    const local = getWinnersLocal();
+    buildWinnersInputArea(local.winners || [], local.title || '');
     try {
       const { winners, title } = await fetchWinners();
       buildWinnersInputArea(winners, title);
     } catch {}
   }
 
+  function renderWinnersModalContent(winners, title) {
+    const listEl = document.getElementById('winnersModalList');
+    const titleEl = document.getElementById('winnersModalTitle');
+    titleEl.textContent = title || 'ကံထူးရှင်များ';
+    if (!winners || winners.length === 0 || winners.every(w => !w.name)) {
+      listEl.innerHTML = '<p style="text-align:center; color:var(--text-light); font-size:0.85rem; padding:1rem 0;">— မဲနှိုက်ရန် မကျေးဇူးမပြုရသေး —</p>';
+      return;
+    }
+    listEl.innerHTML = winners.filter(w => w.name).map((w, i) =>
+      `<div style="display:flex; justify-content:space-between; align-items:center; padding:0.6rem 0.8rem; background:${i===0?'linear-gradient(135deg,#fff9e0,#ffd4b8)':'var(--pink-50)'}; border-radius:12px; margin-bottom:0.5rem; border:1.5px solid ${i===0?'#f09060':'var(--pink-100)'};">
+        <span style="font-size:0.9rem; color:var(--text-dark);">
+          ${i===0?'🥇':i===1?'🥈':i===2?'🥉':'🎁'} <strong>${w.name}</strong>
+        </span>
+        <span style="font-size:0.82rem; color:var(--pink-600); font-weight:600; background:white; padding:0.2rem 0.7rem; border-radius:50px; border:1px solid var(--pink-200);">${w.prize || '—'}</span>
+      </div>`
+    ).join('');
+  }
+
   function openWinnersModal() {
     const modal = document.getElementById('winnersModal');
     if (!modal) return;
     modal.style.display = 'flex';
-    const listEl = document.getElementById('winnersModalList');
-    const titleEl = document.getElementById('winnersModalTitle');
-    listEl.innerHTML = '<p style="text-align:center; color:var(--text-light); font-size:0.85rem;">⏳ ရယူနေသည်...</p>';
+
+    // Show localStorage data immediately (no loading delay)
+    const local = getWinnersLocal();
+    renderWinnersModalContent(local.winners || [], local.title || 'ကံထူးရှင်များ');
+
+    // Then sync from Telegram in background
     fetchWinners().then(({ winners, title }) => {
-      titleEl.textContent = title || 'ကံထူးရှင်များ';
-      if (!winners || winners.length === 0 || winners.every(w => !w.name)) {
-        listEl.innerHTML = '<p style="text-align:center; color:var(--text-light); font-size:0.85rem; padding:1rem 0;">— မဲနှိုက်ရန် မကျေးဇူးမပြုရသေး —</p>';
-        return;
-      }
-      listEl.innerHTML = winners.filter(w => w.name).map((w, i) =>
-        `<div style="display:flex; justify-content:space-between; align-items:center; padding:0.6rem 0.8rem; background:${i===0?'linear-gradient(135deg,#fff9e0,#ffd4b8)':'var(--pink-50)'}; border-radius:12px; margin-bottom:0.5rem; border:1.5px solid ${i===0?'#f09060':'var(--pink-100)'};">
-          <span style="font-size:0.9rem; color:var(--text-dark);">
-            ${i===0?'🥇':i===1?'🥈':i===2?'🥉':'🎁'} <strong>${w.name}</strong>
-          </span>
-          <span style="font-size:0.82rem; color:var(--pink-600); font-weight:600; background:white; padding:0.2rem 0.7rem; border-radius:50px; border:1px solid var(--pink-200);">${w.prize || '—'}</span>
-        </div>`
-      ).join('');
-    }).catch(() => {
-      listEl.innerHTML = '<p style="text-align:center; color:#e74c3c; font-size:0.85rem;">⚠️ ရယူမရပါ</p>';
-    });
+      renderWinnersModalContent(winners, title);
+    }).catch(() => {});
   }
 
   function closeWinnersModal() {
