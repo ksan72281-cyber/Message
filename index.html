@@ -2001,6 +2001,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
 
       showToast('✅ Order တင်ပြီးပါပြီ!');
+      showCelebration();
 
       // ===== FORM CLEAR after success =====
       document.getElementById('recipientName').value = '';
@@ -2043,6 +2044,46 @@ document.addEventListener('DOMContentLoaded', function() {
     toast.textContent = msg;
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 5000);
+  }
+
+  function showCelebration() {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;overflow:hidden;';
+    document.body.appendChild(overlay);
+
+    const emojis = ['🌸','🌺','💖','💝','✨','🌷','💗','🫧','💕','🌼','💓','🎀'];
+    const count = 45;
+
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('div');
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      const size = 1.1 + Math.random() * 1.5;
+      const startX = Math.random() * 100;
+      const delay = Math.random() * 900;
+      const duration = 1800 + Math.random() * 1000;
+      const drift = (Math.random() - 0.5) * 130;
+
+      el.style.cssText = `position:absolute;font-size:${size}rem;left:${startX}vw;top:-60px;opacity:0;user-select:none;`;
+      overlay.appendChild(el);
+
+      setTimeout(() => {
+        const start = performance.now();
+        const rot = (Math.random() > 0.5 ? 1 : -1) * (200 + Math.random() * 200);
+        function tick(now) {
+          const p = Math.min((now - start) / duration, 1);
+          const y = p * (window.innerHeight + 80);
+          const x = drift * Math.sin(p * Math.PI);
+          const opacity = p < 0.1 ? p / 0.1 : p > 0.85 ? (1 - p) / 0.15 : 1;
+          el.style.transform = `translateY(${y}px) translateX(${x}px) rotate(${rot * p}deg)`;
+          el.style.opacity = opacity;
+          if (p < 1) requestAnimationFrame(tick);
+          else el.remove();
+        }
+        requestAnimationFrame(tick);
+      }, delay);
+    }
+
+    setTimeout(() => { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 3200);
   }
 
 
@@ -2093,4 +2134,4 @@ document.addEventListener('DOMContentLoaded', function() {
 }); // end DOMContentLoaded
 </script>
 </body>
-  </html>
+      </html>
