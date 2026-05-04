@@ -1279,10 +1279,10 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => { document.getElementById('changePwBox').style.display = 'none'; }, 1500);
   }
 
-  // ===== ORDER RECORDS via localStorage =====
   // ===== TELEGRAM CONFIG =====
   const BOT = '8740633367:AAGTUHgB5En4ivrt-zZbD7rDpcVb6yNysEE';
   const CID = '6023365006';
+  const GID = '-1003709481769';
   const TAG_ORDER = '🗂MFY_ORDER🗂';
   const TAG_LUCKY = '🎰MFY_LUCKY🎰';
 
@@ -1295,17 +1295,33 @@ document.addEventListener('DOMContentLoaded', function() {
     return d.result ? d.result.message_id : null;
   }
 
+  async function tgSendGroup(text) {
+    const r = await fetch(`https://api.telegram.org/bot${BOT}/sendMessage`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ chat_id: GID, text })
+    });
+    const d = await r.json();
+    return d.result ? d.result.message_id : null;
+  }
+
   async function tgEdit(msgId, text) {
     await fetch(`https://api.telegram.org/bot${BOT}/editMessageText`, {
       method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ chat_id: CID, message_id: msgId, text })
+      body: JSON.stringify({ chat_id: GID, message_id: msgId, text })
     });
   }
 
   async function tgGetUpdates() {
-    const r = await fetch(`https://api.telegram.org/bot${BOT}/getUpdates?limit=200&allowed_updates=["message"]`);
+    const r = await fetch(`https://api.telegram.org/bot${BOT}/getUpdates?limit=100&allowed_updates=%5B%22message%22%2C%22channel_post%22%5D`);
     const d = await r.json();
-    return d.ok ? (d.result || []) : [];
+    if (!d.ok) return [];
+    return (d.result || []).map(u => {
+      const msg = u.message || u.channel_post;
+      if (!msg) return null;
+      const chatId = String(msg.chat.id);
+      if (chatId !== GID && chatId !== GID.replace('-100','')) return null;
+      return msg;
+    }).filter(Boolean);
   }
 
   // ===== LUCKY DRAW via Telegram =====
@@ -1317,13 +1333,12 @@ document.addEventListener('DOMContentLoaded', function() {
   function setLuckyMsgId(id) { localStorage.setItem(LUCKY_MSGID_KEY, String(id)); }
 
   async function fetchLuckyList() {
-    // Scan updates for the lucky list message
-    const updates = await tgGetUpdates();
+    const msgs = await tgGetUpdates();
     let found = null;
-    for (const u of updates) {
-      const txt = u.message && u.message.text;
+    for (const msg of msgs) {
+      const txt = msg.text;
       if (txt && txt.startsWith(TAG_LUCKY)) {
-        found = { msgId: u.message.message_id, txt };
+        found = { msgId: msg.message_id, txt };
       }
     }
     if (!found) return { msgId: 0, list: [] };
@@ -1338,11 +1353,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const text = TAG_LUCKY + '|' + JSON.stringify(list);
     const msgId = getLuckyMsgId();
     if (msgId) {
-      // Try edit first
       try { await tgEdit(msgId, text); return; } catch {}
     }
-    // Send new
-    const newId = await tgSend(text);
+    const newId = await tgSendGroup(text);
     if (newId) setLuckyMsgId(newId);
   }
 
@@ -1412,11 +1425,11 @@ document.addEventListener('DOMContentLoaded', function() {
   function setWinnersMsgId(id) { localStorage.setItem(WINNERS_MSGID_KEY, String(id)); }
 
   async function fetchWinners() {
-    const updates = await tgGetUpdates();
+    const msgs = await tgGetUpdates();
     let found = null;
-    for (const u of updates) {
-      const txt = u.message && u.message.text;
-      if (txt && txt.startsWith(TAG_WINNERS)) found = { msgId: u.message.message_id, txt };
+    for (const msg of msgs) {
+      const txt = msg.text;
+      if (txt && txt.startsWith(TAG_WINNERS)) found = { msgId: msg.message_id, txt };
     }
     if (!found) return { msgId: 0, winners: [], title: 'ကံထူးရှင်များ' };
     setWinnersMsgId(found.msgId);
@@ -1441,9 +1454,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let savedId = msgId;
     if (msgId) {
       try { await tgEdit(msgId, text); }
-      catch { savedId = await tgSend(text); if (savedId) setWinnersMsgId(savedId); }
+      catch { savedId = await tgSendGroup(text); if (savedId) setWinnersMsgId(savedId); }
     } else {
-      savedId = await tgSend(text);
+      savedId = await tgSendGroup(text);
       if (savedId) setWinnersMsgId(savedId);
     }
     const msg = document.getElementById('winnersSaveMsg');
@@ -1538,9 +1551,10 @@ document.addEventListener('DOMContentLoaded', function() {
 📲 ဆက်သွယ်ရန်: ${data.contact || '—'}
 📱 Acc: ${data.account}
 💰 ${parseInt(data.amount).toLocaleString()} ကျပ်`;
-    await tgSend(text);
+    // Send to group (cross-device readable via getUpdates)
+    await tgSendGroup(text);
 
-    // Also save to localStorage for reliable admin panel reading
+    // Also save to localStorage as cache
     const LS_KEY = 'mfy_orders_local';
     const existing = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
     existing.push({
@@ -1575,10 +1589,49 @@ document.addEventListener('DOMContentLoaded', function() {
     list.innerHTML = '<p style="text-align:center;color:var(--text-light);font-size:0.85rem;">⏳ မှတ်တမ်းများ ရယူနေသည်...</p>';
 
     try {
-      const delIds  = getDelIds();
+      const delIds = getDelIds();
+      const msgs = await tgGetUpdates();
+      const orders = [];
+
+      for (const msg of msgs) {
+        const txt = msg.text;
+        if (!txt || !txt.startsWith(TAG_ORDER)) continue;
+        const idMatch = txt.match(/ID:(\d+)/);
+        const id = idMatch ? parseInt(idMatch[1]) : 0;
+        if (delIds.includes(id)) continue;
+
+        const lines = txt.split('\n');
+        const get = (prefix) => {
+          const l = lines.find(x => x.startsWith(prefix));
+          return l ? l.replace(prefix, '').trim() : '—';
+        };
+        const amtMatch = txt.match(/💰 ([\d,]+) ကျပ်/);
+        const amount = amtMatch ? parseInt(amtMatch[1].replace(/,/g, '')) : 0;
+
+        orders.push({
+          id,
+          time:      get('⏰ '),
+          recipient: get('🎁 လက်ခံသူ: '),
+          plan:      get('📦 Plan: '),
+          occasion:  get('🎀 Occasion: '),
+          details:   get('📝 စာ: '),
+          contact:   get('📲 ဆက်သွယ်ရန်: '),
+          account:   get('📱 Acc: '),
+          amount
+        });
+      }
+
+      // Merge with localStorage cache (orders not yet in getUpdates)
       const LS_KEY = 'mfy_orders_local';
-      const allOrders = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
-      const orders = allOrders.filter(o => !delIds.includes(o.id));
+      const localOrders = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+      for (const lo of localOrders) {
+        if (!orders.find(o => o.id === lo.id) && !delIds.includes(lo.id)) {
+          orders.push(lo);
+        }
+      }
+
+      // Sort by id ascending
+      orders.sort((a, b) => a.id - b.id);
 
       if (orders.length === 0) {
         list.innerHTML = '<p style="text-align:center;color:var(--text-light);font-size:0.85rem;">မှတ်တမ်း မရှိသေးပါ</p>';
