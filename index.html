@@ -1296,6 +1296,18 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   function clearSession() { localStorage.removeItem(SESSION_KEY); }
 
+  // ===== HELPER FUNCTIONS =====
+  function isPhoneNumber(str) {
+    return /^\d+$/.test(str);
+  }
+  function isValidPhone(str) {
+    return /^09\d{9}$/.test(str);
+  }
+  function maskPhone(phone) {
+    if (phone.length <= 3) return phone;
+    return '×'.repeat(phone.length - 3) + phone.slice(-3);
+  }
+
   function currentUser() {
     const s = getSession();
     return s ? s.username : null;
@@ -1371,22 +1383,6 @@ document.addEventListener('DOMContentLoaded', function() {
     closeAuth();
     updateNavUI();
     showToast('✅ Welcome, ' + username + '!');
-  }
-
-  // Check if a string looks like a phone number (digits only, possibly starting with 09)
-  function isPhoneNumber(str) {
-    return /^\d+$/.test(str);
-  }
-
-  // Validate phone: must start with 09 and be exactly 11 digits
-  function isValidPhone(str) {
-    return /^09\d{9}$/.test(str);
-  }
-
-  // Mask phone: show last 3 digits, rest as ×
-  function maskPhone(phone) {
-    if (phone.length <= 3) return phone;
-    return '×'.repeat(phone.length - 3) + phone.slice(-3);
   }
 
   function doRegister() {
@@ -1673,6 +1669,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }).join('');
   }
   window.loadAdminUsers = loadAdminUsers;
+
+  async function clearOrders() {
     if (!confirm('Order မှတ်တမ်း အကုန် ဖျက်မည်လား?')) return;
     localStorage.removeItem(DEL_KEY);
     await loadAdminRecords();
@@ -1811,6 +1809,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const isNoRecipient = (occasion === 'find' || occasion === 'announce');
 
+    const details = document.getElementById('details').value;
+    const contact = document.getElementById('contact').value;
+    const photo1 = document.getElementById('photo1').files[0];
+    const photo2 = document.getElementById('photo2').files[0];
+
     if ((!recipient && !isNoRecipient) || !plan || !occasion || !account) {
       alert('⚠️ အချက်အလက်များ အားလုံးဖြည့်ပါ');
       return;
@@ -1829,11 +1832,6 @@ document.addEventListener('DOMContentLoaded', function() {
       alert('⚠️ ငွေလွဲပြေစာ ပုံ ထည့်ပါ');
       return;
     }
-
-    const details = document.getElementById('details').value;
-    const contact = document.getElementById('contact').value;
-    const photo1 = document.getElementById('photo1').files[0];
-    const photo2 = document.getElementById('photo2').files[0];
 
     const occasionText = {
       'birthday': '🎂 မွေးနေ့', 'love': '💌 ချော့ချင်တာ', 'friend': '💜 သူငယ်ချင်း', 
@@ -1991,4 +1989,4 @@ document.addEventListener('DOMContentLoaded', function() {
 }); // end DOMContentLoaded
 </script>
 </body>
-  </html>
+</html>
