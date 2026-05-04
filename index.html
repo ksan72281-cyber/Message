@@ -1405,6 +1405,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!username || !pw) { showAuthErr(err, '⚠️ Username နှင့် Password ထည့်ပါ'); return; }
 
+    // Validate format
+    if (!isPhoneNumber(username) && !username.startsWith('@')) {
+      showAuthErr(err, '❌ Username သည် @ ဖြင့်စရပါမည် (ဥပမာ — @yourname)');
+      return;
+    }
+
     const users = getUsers();
     const key = username.toLowerCase();
     if (!users[key]) { showAuthErr(err, '❌ Username မတွေ့ပါ — Account ဖွင့်ပါ'); return; }
@@ -1428,6 +1434,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (isPhoneNumber(username)) {
       if (!isValidPhone(username)) {
         showAuthErr(err, '❌ ဖုန်းနံပတ် 09 ဖြင့်စပြီး ဂဏန်း ၁၁ လုံးပြည့်ရပါမည် (ဥပမာ — 09xxxxxxxxx)');
+        return;
+      }
+    } else {
+      // Username must start with @
+      if (!username.startsWith('@')) {
+        showAuthErr(err, '❌ Username သည် @ ဖြင့်စရပါမည် (ဥပမာ — @yourname)');
         return;
       }
     }
