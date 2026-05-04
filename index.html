@@ -1123,11 +1123,18 @@
 
     <!-- Actual form (shown when logged in) -->
     <div id="orderFormInner" style="display:none;">
-    <div style="background:var(--lavender); border-radius:12px; padding:0.6rem 1rem; margin-bottom:1.2rem; display:flex; align-items:center; gap:0.5rem;">
-      <span style="font-size:1rem;">👤</span>
-      <span style="font-size:0.85rem; color:var(--lavender-400); font-weight:600;" id="orderUserLabel"></span>
-      <button onclick="openAuth()" style="margin-left:auto; background:white; border:1px solid var(--lavender-200); color:var(--lavender-400); border-radius:50px; padding:0.15rem 0.6rem; font-size:0.75rem; cursor:pointer;">ပြောင်း</button>
+
+    <!-- Compact user info row - same size as form fields -->
+    <div class="form-group">
+      <label>Order တင်သူ</label>
+      <div style="display:flex; align-items:center; gap:0.6rem; background:white; border:1.5px solid var(--lavender-200); border-radius:12px; padding:0.8rem 1rem;">
+        <span style="font-size:0.9rem; color:var(--lavender-400);">👤</span>
+        <span style="font-size:0.9rem; color:var(--text-dark); font-weight:600; flex:1;" id="orderUserLabel"></span>
+        <button onclick="openAuth()" style="background:var(--lavender); border:none; color:var(--lavender-400); border-radius:50px; padding:0.25rem 0.8rem; font-size:0.78rem; cursor:pointer; white-space:nowrap; flex-shrink:0;">ပြောင်း</button>
+      </div>
     </div>
+
+    <div class="form-group">
       <label id="recipientLabel">လက်ခံသူ TikTok / Telegram Username *</label>
       <input type="text" placeholder="@username" id="recipientName">
     </div>
@@ -1298,7 +1305,7 @@ document.addEventListener('DOMContentLoaded', function() {
       loginBtn.style.display = 'none';
       if (gate) gate.style.display = 'none';
       if (formInner) formInner.style.display = 'block';
-      if (orderLabel) orderLabel.textContent = '👤 ' + u + ' အနေနဲ့ Order တင်နေသည်';
+      if (orderLabel) orderLabel.textContent = u;
     } else {
       badge.classList.remove('show');
       loginBtn.style.display = 'block';
