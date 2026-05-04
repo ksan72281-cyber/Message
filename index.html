@@ -1192,7 +1192,7 @@
     </div>
 
     <div class="form-group">
-      <label>TikTok / Telegram သင့် Username ပေးပို့ရန် (ပြန်ဆက်သွယ်ရန်) — <span style="color:var(--pink-400); font-weight:400;">acc ဖွင့်ရာတုန်းက username နဲ့တူတူထည့်ပါ</span></label>
+      <label>TikTok / Telegram သင့် Username ပေးပို့ရန် (ပြန်ဆက်သွယ်ရန်)</label>
       <input type="text" placeholder="@yourusername (ပြန်ဆက်သွယ်ရန်)" id="contact" oninput="checkContactMatch()">
       <p id="contactHint" style="font-size:0.78rem; color:var(--pink-400); margin-top:0.3rem; display:none;"></p>
     </div>
@@ -1648,6 +1648,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  function deleteUser(key) {
+    if (!confirm('ဤ User ကို ဖျက်မည်လား?')) return;
+    const users = getUsers();
+    delete users[key];
+    saveUsers(users);
+    loadAdminUsers();
+  }
+  window.deleteUser = deleteUser;
+
   function loadAdminUsers() {
     const list = document.getElementById('adminUserList');
     if (!list) return;
@@ -1657,14 +1666,19 @@ document.addEventListener('DOMContentLoaded', function() {
       list.innerHTML = '<p style="text-align:center;color:var(--text-light);font-size:0.85rem;">User မရှိသေးပါ</p>';
       return;
     }
-    list.innerHTML = keys.map((k, i) => {
+    list.innerHTML = keys.map((k) => {
       const u = users[k];
       const displayName = isPhoneNumber(k) ? maskPhone(k) : ('××' + k.slice(-3));
       const pw = u.pw || '—';
-      return `<div style="border:1.5px solid var(--lavender-200); border-radius:12px; padding:0.7rem 1rem; margin-bottom:0.6rem; background:var(--lavender); font-size:0.82rem; color:var(--text-mid); display:flex; align-items:center; justify-content:space-between; gap:0.5rem; flex-wrap:wrap;">
-        <span>👤 <strong style="color:var(--text-dark);">${displayName}</strong></span>
-        <span style="background:white; border-radius:8px; padding:0.2rem 0.7rem; font-size:0.8rem; color:var(--pink-600); border:1px solid var(--pink-200);">🔑 ${pw}</span>
-        <span style="font-size:0.72rem; color:var(--text-light);">${u.createdAt || ''}</span>
+      return `<div style="border:1.5px solid var(--lavender-200); border-radius:12px; padding:0.7rem 1rem; margin-bottom:0.6rem; background:var(--lavender); font-size:0.82rem; color:var(--text-mid);">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem; flex-wrap:wrap;">
+          <span>👤 <strong style="color:var(--text-dark);">${displayName}</strong></span>
+          <div style="display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap;">
+            <span style="background:white; border-radius:8px; padding:0.2rem 0.7rem; font-size:0.8rem; color:var(--pink-600); border:1px solid var(--pink-200);">🔑 ${pw}</span>
+            <button onclick="deleteUser('${k}')" style="background:#fff0f0; border:1px solid #f5a8a8; color:#c0392b; border-radius:50px; padding:0.2rem 0.7rem; font-size:0.75rem; cursor:pointer;">🗑 ဖျက်</button>
+          </div>
+        </div>
+        <div style="font-size:0.72rem; color:var(--text-light); margin-top:0.3rem;">${u.createdAt || ''}</div>
       </div>`;
     }).join('');
   }
@@ -1989,4 +2003,4 @@ document.addEventListener('DOMContentLoaded', function() {
 }); // end DOMContentLoaded
 </script>
 </body>
-</html>
+  </html>
