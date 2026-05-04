@@ -2087,30 +2087,55 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
 
-  // ===== KEYBOARD DETECTION — hide sticky bar when typing =====
+  // ===== KEYBOARD DETECTION — hide sticky bar when ANY input is focused =====
   (function() {
     const bar = document.getElementById('stickyBar');
     if (!bar) return;
-    let initialH = window.innerHeight;
 
-    function onResize() {
+    let initialH = window.innerHeight;
+    let keyboardOpen = false;
+
+    // Method 1: viewport resize (Android Chrome)
+    window.addEventListener('resize', () => {
       const currentH = window.innerHeight;
-      // If viewport shrinks by more than 150px, keyboard is likely open
-      if (initialH - currentH > 150) {
+      if (initialH - currentH > 100) {
+        keyboardOpen = true;
         bar.style.transform = 'translateY(200%)';
       } else {
+        keyboardOpen = false;
         bar.style.transform = 'translateY(0)';
+        initialH = window.innerHeight;
       }
+    });
+
+    // Method 2: focus/blur on ALL inputs, textareas, selects anywhere on page
+    function hideBar() {
+      keyboardOpen = true;
+      bar.style.transform = 'translateY(200%)';
+    }
+    function showBar() {
+      setTimeout(() => {
+        // Only show if no other input is focused
+        const active = document.activeElement;
+        const isInput = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT');
+        if (!isInput) {
+          keyboardOpen = false;
+          bar.style.transform = 'translateY(0)';
+        }
+      }, 350);
     }
 
-    window.addEventListener('resize', onResize);
-
-    // Also hide on focus of any input/textarea/select inside order form
-    document.querySelectorAll('.order-form input, .order-form textarea, .order-form select').forEach(el => {
-      el.addEventListener('focus', () => { bar.style.transform = 'translateY(200%)'; });
-      el.addEventListener('blur', () => {
-        setTimeout(() => { bar.style.transform = 'translateY(0)'; }, 300);
-      });
+    document.addEventListener('focusin', (e) => {
+      const tag = e.target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+        hideBar();
+      }
+    });
+    document.addEventListener('focusout', (e) => {
+      const tag = e.target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+        showBar();
+      }
     });
   })();
 
