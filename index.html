@@ -346,7 +346,7 @@
   .sample-emoji { font-size: 1.5rem; margin-bottom: 0.5rem; display: block; }
 
   /* ===== ORDER FORM ===== */
-  .order { background: white; }
+  .order { background: white; padding-bottom: 8rem; }
 
   .order-form {
     max-width: 600px;
@@ -482,7 +482,7 @@
     background: var(--text-dark);
     color: var(--text-light);
     text-align: center;
-    padding: 2rem 1rem 7rem;
+    padding: 2rem 1rem 9rem;
     font-size: 0.85rem;
   }
 
@@ -2093,38 +2093,36 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!bar) return;
 
     let initialH = window.innerHeight;
-    let keyboardOpen = false;
 
-    // Method 1: viewport resize (Android Chrome)
-    window.addEventListener('resize', () => {
-      const currentH = window.innerHeight;
-      if (initialH - currentH > 100) {
-        keyboardOpen = true;
-        bar.style.transform = 'translateY(200%)';
-      } else {
-        keyboardOpen = false;
-        bar.style.transform = 'translateY(0)';
-        initialH = window.innerHeight;
-      }
-    });
-
-    // Method 2: focus/blur on ALL inputs, textareas, selects anywhere on page
     function hideBar() {
-      keyboardOpen = true;
-      bar.style.transform = 'translateY(200%)';
+      bar.style.display = 'none';
     }
     function showBar() {
       setTimeout(() => {
-        // Only show if no other input is focused
         const active = document.activeElement;
         const isInput = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT');
         if (!isInput) {
-          keyboardOpen = false;
-          bar.style.transform = 'translateY(0)';
+          bar.style.display = 'flex';
         }
       }, 350);
     }
 
+    // Method 1: viewport resize (most reliable on Android Chrome)
+    window.addEventListener('resize', () => {
+      const currentH = window.innerHeight;
+      if (initialH - currentH > 100) {
+        hideBar();
+      } else {
+        const active = document.activeElement;
+        const isInput = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT');
+        if (!isInput) {
+          bar.style.display = 'flex';
+          initialH = window.innerHeight;
+        }
+      }
+    });
+
+    // Method 2: focus/blur on ALL inputs anywhere on page
     document.addEventListener('focusin', (e) => {
       const tag = e.target.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
