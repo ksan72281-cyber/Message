@@ -1357,18 +1357,26 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===== MONGODB BACKEND URL =====
-  const BACKEND_URL = 'https://message-12dn.onrender.com';
+  const BACKEND_URL = 'https://message-backend-0ge1.onrender.com';
 
-  async function tgFetchUsers() {
-    try {
-      const r = await fetch(`${BACKEND_URL}/get-users`);
-      const list = await r.json();
-      const users = {};
-      for (const u of list) {
-        users[u.userId.toLowerCase()] = { displayName: u.userId, pw: u.pw, createdAt: u.createdAt };
+
+  async function tgFetchUsers(retries = 3) {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const r = await fetch(`${BACKEND_URL}/get-users`);
+        if (!r.ok) throw new Error('Server error: ' + r.status);
+        const list = await r.json();
+        const users = {};
+        for (const u of list) {
+          users[u.userId.toLowerCase()] = { displayName: u.userId, pw: u.pw, createdAt: u.createdAt };
+        }
+        return users;
+      } catch (e) {
+        console.error('tgFetchUsers attempt', i+1, e);
+        if (i < retries - 1) await new Promise(res => setTimeout(res, 2000));
       }
-      return users;
-    } catch (e) { console.error('tgFetchUsers:', e); return {}; }
+    }
+    throw new Error('Failed to fetch after retries');
   }
 
   async function tgSaveUser(username, pw) {
@@ -1484,7 +1492,7 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
-    err.textContent = '⏳ စစ်ဆေးနေသည်...';
+    err.textContent = '⏳ Server နှိုးနေသည်... ခဏစောင့်ပါ (15-30 စက္ကန့်)';
     err.style.display = 'block';
     err.style.color = 'var(--text-mid)';
 
@@ -1499,7 +1507,7 @@ document.addEventListener('DOMContentLoaded', function() {
       updateNavUI();
       showToast('✅ Welcome, ' + username + '!');
     } catch {
-      showAuthErr(err, '⚠️ ချိတ်ဆက်မှု အမှား — ပြန်ကြိုးစားပါ');
+      showAuthErr(err, '⚠️ Server ချိတ်ဆက်မရပါ — ခဏစောင့်ပြီး ထပ်ကြိုးစားပါ');
     }
   }
 
@@ -1525,7 +1533,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (pw !== confirm) { showAuthErr(err, '❌ Password မတိုက်ဆိုင်ပါ'); return; }
     if (pw.length < 4) { showAuthErr(err, '⚠️ Password အနည်းဆုံး ၄ လုံး'); return; }
 
-    err.textContent = '⏳ Account ဖွင့်နေသည်...';
+    err.textContent = '⏳ Server နှိုးနေသည်... ခဏစောင့်ပါ (15-30 စက္ကန့်)';
     err.style.display = 'block';
     err.style.color = 'var(--text-mid)';
 
@@ -1540,7 +1548,7 @@ document.addEventListener('DOMContentLoaded', function() {
       updateNavUI();
       showToast('✅ Account ဖွင့်ပြီးပါပြီ! ကြိုဆိုပါတယ် 💜');
     } catch {
-      showAuthErr(err, '⚠️ ချိတ်ဆက်မှု အမှား — ပြန်ကြိုးစားပါ');
+      showAuthErr(err, '⚠️ Server ချိတ်ဆက်မရပါ — ခဏစောင့်ပြီး ထပ်ကြိုးစားပါ');
     }
   }
 
