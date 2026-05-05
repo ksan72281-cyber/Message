@@ -1320,15 +1320,43 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
-  // ===== USER AUTH SYSTEM =====
+  // ===== USER AUTH SYSTEM (Telegram as DB) =====
   // Users stored in localStorage as: { username: { pw, createdAt } }
   const USERS_KEY = 'mfy_users';
   const SESSION_KEY = 'mfy_session';
+  const TAG_USER = '🗂MFY_USER🗂';
 
-  function getUsers() {
-    try { return JSON.parse(localStorage.getItem(USERS_KEY) || '{}'); } catch { return {}; }
+  // Telegram config (needed for auth too)
+  const BOT_AUTH = '8740633367:AAGTUHgB5En4ivrt-zZbD7rDpcVb6yNysEE';
+  const CID_AUTH = '6023365006';
+
+  async function tgFetchUsers() {
+    try {
+      const r = await fetch(`https://api.telegram.org/bot${BOT_AUTH}/getUpdates?limit=100&allowed_updates=%5B%22message%22%5D`);
+      const d = await r.json();
+      if (!d.ok) return {};
+      const users = {};
+      for (const upd of (d.result || [])) {
+        const msg = upd.message;
+        if (!msg || String(msg.chat.id) !== CID_AUTH) continue;
+        const txt = msg.text || '';
+        if (!txt.startsWith(TAG_USER)) continue;
+        const get = (key) => { const m = txt.match(new RegExp(key + ':([^|\\n]+)')); return m ? m[1].trim() : ''; };
+        const uname = get('user');
+        if (!uname) continue;
+        users[uname.toLowerCase()] = { displayName: uname, pw: get('pw'), createdAt: get('created') };
+      }
+      return users;
+    } catch { return {}; }
   }
-  function saveUsers(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+
+  async function tgSaveUser(username, pw) {
+    const text = `${TAG_USER}|user:${username}|pw:${pw}|created:${new Date().toLocaleString('my-MM')}`;
+    await fetch(`https://api.telegram.org/bot${BOT_AUTH}/sendMessage`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ chat_id: CID_AUTH, text })
+    });
+  }
 
   function getSession() {
     try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch { return null; }
@@ -1365,7 +1393,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (u) {
       badge.classList.add('show');
-      // Mask phone numbers in nav badge
       const displayName = isPhoneNumber(u) ? maskPhone(u) : u;
       document.getElementById('userBadgeName').textContent = displayName;
       loginBtn.style.display = 'none';
@@ -1373,18 +1400,14 @@ document.addEventListener('DOMContentLoaded', function() {
       if (formInner) formInner.style.display = 'block';
       if (orderLabel) orderLabel.textContent = isPhoneNumber(u) ? maskPhone(u) : u;
 
-      // Contact field: hide for phone users, show with hint for username users
       const contactGroup = document.getElementById('contactGroup');
       const contactHintLabel = document.getElementById('contactHintLabel');
       if (contactGroup) {
-        if (isPhoneNumber(u)) {
-          contactGroup.style.display = 'none';
-          // Clear contact value so it doesn't interfere with order
-          const contactEl = document.getElementById('contact');
-          if (contactEl) contactEl.value = '';
-        } else {
-          contactGroup.style.display = 'block';
-          if (contactHintLabel) contactHintLabel.textContent = 'acc ဖွင့်တုန်းက username နှင့်တူတူထည့်ရန်';
+        contactGroup.style.display = 'block';
+        if (contactHintLabel) {
+          contactHintLabel.textContent = isPhoneNumber(u)
+            ? 'ပြန်ဆက်သွယ်ရန် TikTok / Telegram username ထည့်ပေးပါ'
+            : 'acc ဖွင့်တုန်းက username နှင့်တူတူထည့်ရန်';
         }
       }
     } else {
@@ -1424,66 +1447,75 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('registerErr').style.display = 'none';
   }
 
-  function doLogin() {
+  async function doLogin() {
     const username = document.getElementById('loginUser').value.trim();
     const pw = document.getElementById('loginPw').value;
     const err = document.getElementById('loginErr');
 
     if (!username || !pw) { showAuthErr(err, '⚠️ Username နှင့် Password ထည့်ပါ'); return; }
-
-    // Validate format
     if (!isPhoneNumber(username) && !username.startsWith('@')) {
       showAuthErr(err, '❌ Username သည် @ ဖြင့်စရပါမည် (ဥပမာ — @yourname)');
       return;
     }
 
-    const users = getUsers();
-    const key = username.toLowerCase();
-    if (!users[key]) { showAuthErr(err, '❌ Username မတွေ့ပါ — Account ဖွင့်ပါ'); return; }
-    if (users[key].pw !== pw) { showAuthErr(err, '❌ Password မှားသည်'); return; }
+    err.textContent = '⏳ စစ်ဆေးနေသည်...';
+    err.style.display = 'block';
+    err.style.color = 'var(--text-mid)';
 
-    setSession(username);
-    closeAuth();
-    updateNavUI();
-    showToast('✅ Welcome, ' + username + '!');
+    try {
+      const users = await tgFetchUsers();
+      const key = username.toLowerCase();
+      if (!users[key]) { showAuthErr(err, '❌ Username မတွေ့ပါ — Account ဖွင့်ပါ'); return; }
+      if (users[key].pw !== pw) { showAuthErr(err, '❌ Password မှားသည်'); return; }
+
+      setSession(username);
+      closeAuth();
+      updateNavUI();
+      showToast('✅ Welcome, ' + username + '!');
+    } catch {
+      showAuthErr(err, '⚠️ ချိတ်ဆက်မှု အမှား — ပြန်ကြိုးစားပါ');
+    }
   }
 
-  function doRegister() {
+  async function doRegister() {
     const username = document.getElementById('regUser').value.trim();
     const pw = document.getElementById('regPw').value;
     const confirm = document.getElementById('regPwConfirm').value;
     const err = document.getElementById('registerErr');
 
     if (!username) { showAuthErr(err, '⚠️ Username ထည့်ပါ'); return; }
-
-    // Phone number validation
     if (isPhoneNumber(username)) {
       if (!isValidPhone(username)) {
         showAuthErr(err, '❌ ဖုန်းနံပတ် 09 ဖြင့်စပြီး ဂဏန်း ၁၁ လုံးပြည့်ရပါမည် (ဥပမာ — 09xxxxxxxxx)');
         return;
       }
     } else {
-      // Username must start with @
       if (!username.startsWith('@')) {
         showAuthErr(err, '❌ Username သည် @ ဖြင့်စရပါမည် (ဥပမာ — @yourname)');
         return;
       }
     }
-
     if (!pw) { showAuthErr(err, '⚠️ Password ထည့်ပါ'); return; }
     if (pw !== confirm) { showAuthErr(err, '❌ Password မတိုက်ဆိုင်ပါ'); return; }
     if (pw.length < 4) { showAuthErr(err, '⚠️ Password အနည်းဆုံး ၄ လုံး'); return; }
 
-    const users = getUsers();
-    const key = username.toLowerCase();
-    if (users[key]) { showAuthErr(err, '❌ Username ရှိနှင့်ပြီးပါပြီ — Login ဝင်ပါ'); return; }
+    err.textContent = '⏳ Account ဖွင့်နေသည်...';
+    err.style.display = 'block';
+    err.style.color = 'var(--text-mid)';
 
-    users[key] = { pw, displayName: username, createdAt: new Date().toLocaleString('my-MM') };
-    saveUsers(users);
-    setSession(username);
-    closeAuth();
-    updateNavUI();
-    showToast('✅ Account ဖွင့်ပြီးပါပြီ! ကြိုဆိုပါတယ် 💜');
+    try {
+      const users = await tgFetchUsers();
+      const key = username.toLowerCase();
+      if (users[key]) { showAuthErr(err, '❌ Username ရှိနှင့်ပြီးပါပြီ — Login ဝင်ပါ'); return; }
+
+      await tgSaveUser(username, pw);
+      setSession(username);
+      closeAuth();
+      updateNavUI();
+      showToast('✅ Account ဖွင့်ပြီးပါပြီ! ကြိုဆိုပါတယ် 💜');
+    } catch {
+      showAuthErr(err, '⚠️ ချိတ်ဆက်မှု အမှား — ပြန်ကြိုးစားပါ');
+    }
   }
 
   function doLogout() {
@@ -1494,7 +1526,9 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function showAuthErr(el, msg) {
+    if (typeof el === 'string') el = document.getElementById(el);
     el.textContent = msg;
+    el.style.color = '#c0392b';
     el.style.display = 'block';
   }
 
@@ -1764,39 +1798,32 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  function deleteUser(key) {
-    if (!confirm('ဤ User ကို ဖျက်မည်လား?')) return;
-    const users = getUsers();
-    delete users[key];
-    saveUsers(users);
-    loadAdminUsers();
-  }
-  window.deleteUser = deleteUser;
-
-  function loadAdminUsers() {
+  async function loadAdminUsers() {
     const list = document.getElementById('adminUserList');
     if (!list) return;
-    const users = getUsers();
-    const keys = Object.keys(users);
-    if (keys.length === 0) {
-      list.innerHTML = '<p style="text-align:center;color:var(--text-light);font-size:0.85rem;">User မရှိသေးပါ</p>';
-      return;
-    }
-    list.innerHTML = keys.map((k) => {
-      const u = users[k];
-      const displayName = isPhoneNumber(k) ? maskPhone(k) : ('××' + k.slice(-3));
-      const pw = u.pw || '—';
-      return `<div style="border:1.5px solid var(--lavender-200); border-radius:12px; padding:0.7rem 1rem; margin-bottom:0.6rem; background:var(--lavender); font-size:0.82rem; color:var(--text-mid);">
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem; flex-wrap:wrap;">
-          <span>👤 <strong style="color:var(--text-dark);">${displayName}</strong></span>
-          <div style="display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap;">
+    list.innerHTML = '<p style="text-align:center;color:var(--text-light);font-size:0.85rem;">⏳ User များ ရယူနေသည်...</p>';
+    try {
+      const users = await tgFetchUsers();
+      const keys = Object.keys(users);
+      if (keys.length === 0) {
+        list.innerHTML = '<p style="text-align:center;color:var(--text-light);font-size:0.85rem;">User မရှိသေးပါ</p>';
+        return;
+      }
+      list.innerHTML = keys.map((k) => {
+        const u = users[k];
+        const displayName = isPhoneNumber(k) ? maskPhone(k) : ('××' + k.slice(-3));
+        const pw = u.pw || '—';
+        return `<div style="border:1.5px solid var(--lavender-200); border-radius:12px; padding:0.7rem 1rem; margin-bottom:0.6rem; background:var(--lavender); font-size:0.82rem; color:var(--text-mid);">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem; flex-wrap:wrap;">
+            <span>👤 <strong style="color:var(--text-dark);">${displayName}</strong></span>
             <span style="background:white; border-radius:8px; padding:0.2rem 0.7rem; font-size:0.8rem; color:var(--pink-600); border:1px solid var(--pink-200);">🔑 ${pw}</span>
-            <button onclick="deleteUser('${k}')" style="background:#fff0f0; border:1px solid #f5a8a8; color:#c0392b; border-radius:50px; padding:0.2rem 0.7rem; font-size:0.75rem; cursor:pointer;">🗑 ဖျက်</button>
           </div>
-        </div>
-        <div style="font-size:0.72rem; color:var(--text-light); margin-top:0.3rem;">${u.createdAt || ''}</div>
-      </div>`;
-    }).join('');
+          <div style="font-size:0.72rem; color:var(--text-light); margin-top:0.3rem;">${u.createdAt || ''}</div>
+        </div>`;
+      }).join('');
+    } catch {
+      list.innerHTML = '<p style="text-align:center;color:#e74c3c;font-size:0.85rem;">⚠️ ရယူမရပါ</p>';
+    }
   }
   window.loadAdminUsers = loadAdminUsers;
 
