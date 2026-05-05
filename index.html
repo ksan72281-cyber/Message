@@ -1338,17 +1338,19 @@ document.addEventListener('DOMContentLoaded', function() {
   const BOT_AUTH = '8740633367:AAGTUHgB5En4ivrt-zZbD7rDpcVb6yNysEE';
   const CID_AUTH = '-1003738737262';
 
+  // Bot inbox chat ID — send user data to bot's own private message (admin chat)
+  // This ensures getUpdates can read it reliably
+  const ADMIN_CID = '6023365006'; // admin's personal Telegram ID
+
   async function tgFetchAllMessages() {
-    // Use offset=0 (don't advance) to read without consuming queue
     const allMsgs = [];
     try {
-      // Fetch last 100 updates without advancing offset
-      const r = await fetch(`https://api.telegram.org/bot${BOT_AUTH}/getUpdates?limit=100&allowed_updates=%5B%22message%22%2C%22channel_post%22%5D`);
+      const r = await fetch(`https://api.telegram.org/bot${BOT_AUTH}/getUpdates?limit=100`);
       const d = await r.json();
       if (!d.ok || !d.result) return allMsgs;
       for (const upd of d.result) {
         const msg = upd.message || upd.channel_post;
-        if (msg && String(msg.chat.id) === CID_AUTH) allMsgs.push(msg);
+        if (msg) allMsgs.push(msg);
       }
     } catch {}
     return allMsgs;
@@ -1364,19 +1366,37 @@ document.addEventListener('DOMContentLoaded', function() {
         const get = (key) => { const m = txt.match(new RegExp(key + ':([^|\\n]+)')); return m ? m[1].trim() : ''; };
         const uname = get('user');
         if (!uname) continue;
-        // Latest record wins
         users[uname.toLowerCase()] = { displayName: uname, pw: get('pw'), createdAt: get('created') };
       }
+      // Also check localStorage cache
+      try {
+        const cached = JSON.parse(localStorage.getItem('mfy_users_cache') || '{}');
+        for (const k of Object.keys(cached)) {
+          if (!users[k]) users[k] = cached[k];
+        }
+      } catch {}
       return users;
     } catch (e) { console.error('tgFetchUsers:', e); return {}; }
   }
 
   async function tgSaveUser(username, pw) {
     const text = `${TAG_USER}|user:${username}|pw:${pw}|created:${new Date().toLocaleString('my-MM')}`;
+    // Save to channel
     await fetch(`https://api.telegram.org/bot${BOT_AUTH}/sendMessage`, {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ chat_id: CID_AUTH, text })
     });
+    // Also save to admin private chat so getUpdates can read it
+    await fetch(`https://api.telegram.org/bot${BOT_AUTH}/sendMessage`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ chat_id: ADMIN_CID, text })
+    });
+    // Cache in localStorage too
+    try {
+      const cache = JSON.parse(localStorage.getItem('mfy_users_cache') || '{}');
+      cache[username.toLowerCase()] = { displayName: username, pw, createdAt: new Date().toLocaleString('my-MM') };
+      localStorage.setItem('mfy_users_cache', JSON.stringify(cache));
+    } catch {}
   }
 
   function getSession() {
