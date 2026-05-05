@@ -1320,8 +1320,16 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
+  // ===== CLEAR OLD LOCALSTORAGE DATA (one-time migration) =====
+  // Force all users to re-register with Telegram-based auth
+  const MIGRATED_KEY = 'mfy_v2_migrated';
+  if (!localStorage.getItem(MIGRATED_KEY)) {
+    // Clear all old keys
+    ['mfy_users','mfy_session','mfy_del_ids','mfy_balance','mfy_admin_pw','mfy_maintenance'].forEach(k => localStorage.removeItem(k));
+    localStorage.setItem(MIGRATED_KEY, '1');
+  }
+
   // ===== USER AUTH SYSTEM (Telegram as DB) =====
-  // Users stored in localStorage as: { username: { pw, createdAt } }
   const USERS_KEY = 'mfy_users';
   const SESSION_KEY = 'mfy_session';
   const TAG_USER = '🗂MFY_USER🗂';
