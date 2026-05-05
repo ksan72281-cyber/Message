@@ -1589,18 +1589,25 @@ document.addEventListener('DOMContentLoaded', function() {
     return localStorage.getItem(ADMIN_PW_KEY) || '2862009H';
   }
 
-  // ===== MAINTENANCE MODE =====
-  const MAINTENANCE_KEY = 'mfy_maintenance';
+  // ===== MAINTENANCE MODE (Backend-based — affects ALL devices) =====
+  const MAINTENANCE_KEY = 'mfy_maintenance'; // kept for legacy compat only
 
-  function isMaintenance() {
-    return localStorage.getItem(MAINTENANCE_KEY) === '1';
+  async function isMaintenance() {
+    try {
+      const r = await fetch(`${BACKEND_URL}/get-maintenance`);
+      const d = await r.json();
+      return d.maintenance === true;
+    } catch {
+      return false;
+    }
   }
 
-  function applyMaintenance() {
+  async function applyMaintenance() {
     const overlay = document.getElementById('maintenanceOverlay');
     const btn = document.getElementById('maintenanceBtn');
     const status = document.getElementById('maintenanceStatus');
-    if (isMaintenance()) {
+    const on = await isMaintenance();
+    if (on) {
       overlay.style.display = 'flex';
       if (btn) { btn.textContent = '🟢 ပြန်ဖွင့်မည်'; btn.style.background = '#27ae60'; }
       if (status) status.textContent = 'ပိတ်ထားသည် 🔴';
@@ -1611,18 +1618,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  function toggleMaintenance() {
-    if (isMaintenance()) {
-      localStorage.removeItem(MAINTENANCE_KEY);
-    } else {
-      localStorage.setItem(MAINTENANCE_KEY, '1');
+  async function toggleMaintenance() {
+    const btn = document.getElementById('maintenanceBtn');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳...'; }
+    try {
+      const on = await isMaintenance();
+      await fetch(`${BACKEND_URL}/set-maintenance`, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ value: !on })
+      });
+      await applyMaintenance();
+    } catch {
+      showToast('⚠️ Server ချိတ်ဆက်မရပါ');
+    } finally {
+      if (btn) btn.disabled = false;
     }
-    applyMaintenance();
   }
   window.toggleMaintenance = toggleMaintenance;
 
   // Apply on load
-  applyMaintenance();
+  applyMaintenance(); // async - runs in background
 
   function openAdmin() {
     document.getElementById('adminOverlay').classList.add('open');
@@ -1634,14 +1649,14 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => document.getElementById('adminPwInput').focus(), 100);
   }
 
-  function openAdminDirect() {
+  async function openAdminDirect() {
     document.getElementById('adminOverlay').classList.add('open');
     document.getElementById('adminLoginBox').style.display = 'none';
     document.getElementById('adminRecords').style.display = 'block';
     document.getElementById('changePwBox').style.display = 'none';
     loadAdminRecords();
     loadAdminUsers();
-    applyMaintenance();
+    await applyMaintenance();
   }
   window.openAdminDirect = openAdminDirect;
 
@@ -1653,14 +1668,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (e.target === this) closeAdmin();
   });
 
-  function checkAdminPw() {
+  async function checkAdminPw() {
     const pw = document.getElementById('adminPwInput').value;
     if (pw === getAdminPw()) {
       document.getElementById('adminLoginBox').style.display = 'none';
       document.getElementById('adminRecords').style.display = 'block';
       loadAdminRecords();
       loadAdminUsers();
-      applyMaintenance();
+      await applyMaintenance();
     } else {
       document.getElementById('adminPwErr').style.display = 'block';
     }
@@ -1848,10 +1863,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const u = users[k];
         const displayName = isPhoneNumber(k) ? maskPhone(k) : ('××' + k.slice(-3));
         const pw = u.pw || '—';
-        return `<div style="border:1.5px solid var(--lavender-200); border-radius:12px; padding:0.7rem 1rem; margin-bottom:0.6rem; background:var(--lavender); font-size:0.82rem; color:var(--text-mid);">
+        const realName = u.displayName || k;
+        return `<div id="usr_${btoa(k).replace(/=/g,'')}" style="border:1.5px solid var(--lavender-200); border-radius:12px; padding:0.7rem 1rem; margin-bottom:0.6rem; background:var(--lavender); font-size:0.82rem; color:var(--text-mid);">
           <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem; flex-wrap:wrap;">
             <span>👤 <strong style="color:var(--text-dark);">${displayName}</strong></span>
-            <span style="background:white; border-radius:8px; padding:0.2rem 0.7rem; font-size:0.8rem; color:var(--pink-600); border:1px solid var(--pink-200);">🔑 ${pw}</span>
+            <div style="display:flex; gap:0.4rem; align-items:center; flex-wrap:wrap;">
+              <span style="background:white; border-radius:8px; padding:0.2rem 0.7rem; font-size:0.8rem; color:var(--pink-600); border:1px solid var(--pink-200);">🔑 ${pw}</span>
+              <button onclick="deleteUser('${realName}')" style="background:#fff0f0; border:1px solid #f5a8a8; color:#c0392b; border-radius:50px; padding:0.2rem 0.6rem; font-size:0.75rem; cursor:pointer;">🗑 ဖျက်</button>
+            </div>
           </div>
           <div style="font-size:0.72rem; color:var(--text-light); margin-top:0.3rem;">${u.createdAt || ''}</div>
         </div>`;
@@ -1861,6 +1880,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   window.loadAdminUsers = loadAdminUsers;
+
+  async function deleteUser(userId) {
+    if (!confirm(`"${userId}" ကို ဖျက်မည်လား?\nUser ဒီ account ဖြင့် login ဝင်မရတော့ပါ။`)) return;
+    try {
+      await fetch(`${BACKEND_URL}/delete-user`, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ userId })
+      });
+      showToast('✅ User ဖျက်ပြီးပါပြီ');
+      await loadAdminUsers();
+    } catch {
+      showToast('⚠️ ဖျက်မရပါ — ထပ်ကြိုးစားပါ');
+    }
+  }
+  window.deleteUser = deleteUser;
 
   async function clearOrders() {
     if (!confirm('Order မှတ်တမ်း အကုန် ဖျက်မည်လား?')) return;
@@ -2298,4 +2332,4 @@ document.addEventListener('DOMContentLoaded', function() {
 }); // end DOMContentLoaded
 </script>
 </body>
-        </html>
+  </html>
