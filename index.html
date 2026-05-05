@@ -1336,26 +1336,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Telegram config (needed for auth too)
   const BOT_AUTH = '8740633367:AAGTUHgB5En4ivrt-zZbD7rDpcVb6yNysEE';
-  const CID_AUTH = '6023365006';
+  const CID_AUTH = '-1003738737262';
+
+  async function tgFetchAllMessages() {
+    // Use offset=0 (don't advance) to read without consuming queue
+    const allMsgs = [];
+    try {
+      // Fetch last 100 updates without advancing offset
+      const r = await fetch(`https://api.telegram.org/bot${BOT_AUTH}/getUpdates?limit=100&allowed_updates=%5B%22message%22%2C%22channel_post%22%5D`);
+      const d = await r.json();
+      if (!d.ok || !d.result) return allMsgs;
+      for (const upd of d.result) {
+        const msg = upd.message || upd.channel_post;
+        if (msg && String(msg.chat.id) === CID_AUTH) allMsgs.push(msg);
+      }
+    } catch {}
+    return allMsgs;
+  }
 
   async function tgFetchUsers() {
     try {
-      const r = await fetch(`https://api.telegram.org/bot${BOT_AUTH}/getUpdates?limit=100&allowed_updates=%5B%22message%22%5D`);
-      const d = await r.json();
-      if (!d.ok) return {};
+      const msgs = await tgFetchAllMessages();
       const users = {};
-      for (const upd of (d.result || [])) {
-        const msg = upd.message;
-        if (!msg || String(msg.chat.id) !== CID_AUTH) continue;
+      for (const msg of msgs) {
         const txt = msg.text || '';
         if (!txt.startsWith(TAG_USER)) continue;
         const get = (key) => { const m = txt.match(new RegExp(key + ':([^|\\n]+)')); return m ? m[1].trim() : ''; };
         const uname = get('user');
         if (!uname) continue;
+        // Latest record wins
         users[uname.toLowerCase()] = { displayName: uname, pw: get('pw'), createdAt: get('created') };
       }
       return users;
-    } catch { return {}; }
+    } catch (e) { console.error('tgFetchUsers:', e); return {}; }
   }
 
   async function tgSaveUser(username, pw) {
@@ -1679,7 +1692,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // ===== TELEGRAM CONFIG =====
   const BOT = '8740633367:AAGTUHgB5En4ivrt-zZbD7rDpcVb6yNysEE';
-  const CID = '6023365006';
+  const CID = '-1003738737262';
   const TAG_ORDER = '🗂MFY_ORDER🗂';
 
   async function tgSend(text) {
@@ -1692,15 +1705,9 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   async function tgGetUpdates() {
-    const r = await fetch(`https://api.telegram.org/bot${BOT}/getUpdates?limit=100&allowed_updates=%5B%22message%22%5D`);
-    const d = await r.json();
-    if (!d.ok) return [];
-    return (d.result || []).map(u => {
-      const msg = u.message;
-      if (!msg) return null;
-      if (String(msg.chat.id) !== CID) return null;
-      return msg;
-    }).filter(Boolean);
+    try {
+      return await tgFetchAllMessages();
+    } catch { return []; }
   }
 
   // ===== ORDER RECORDS via Telegram =====
