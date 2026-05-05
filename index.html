@@ -863,7 +863,10 @@
           <span>💰 စုစုပေါင်း</span>
           <span id="adminTotalAmt">0 ကျပ်</span>
         </div>
-        <button class="admin-clear" onclick="clearOrders()">🗑 Order အကုန်ဖျက်မည်</button>
+        <div style="display:flex; gap:0.5rem; margin-bottom:0.8rem; flex-wrap:wrap;">
+          <button onclick="loadAdminRecords()" style="background:var(--lavender); border:none; border-radius:50px; padding:0.3rem 0.9rem; font-size:0.78rem; color:var(--lavender-400); cursor:pointer;">🔄 Refresh</button>
+          <button class="admin-clear" onclick="clearOrders()" style="float:none;">🗑 Order အကုန်ဖျက်မည်</button>
+        </div>
         <div style="clear:both; margin-bottom:0.8rem;"></div>
         <div id="adminOrderList"></div>
       </div>
@@ -1768,10 +1771,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
   async function deleteOrder(id) {
     if (!confirm('ဤ Order ကို ဖျက်မည်လား?')) return;
-    addDelId(id);
-    const el = document.getElementById('ord_' + id);
-    if (el) el.remove();
-    await loadAdminRecords();
+    try {
+      await fetch(`${BACKEND_URL}/delete-order`, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ id })
+      });
+      const el = document.getElementById('ord_' + id);
+      if (el) el.remove();
+      await loadAdminRecords();
+    } catch {
+      showToast('⚠️ ဖျက်မရပါ — ထပ်ကြိုးစားပါ');
+    }
   }
 
   async function loadAdminRecords() {
@@ -1780,41 +1790,12 @@ document.addEventListener('DOMContentLoaded', function() {
     list.innerHTML = '<p style="text-align:center;color:var(--text-light);font-size:0.85rem;">⏳ မှတ်တမ်းများ ရယူနေသည်...</p>';
 
     try {
-      const delIds = getDelIds();
-      const msgs = await tgGetUpdates();
-      const orders = [];
+      const r = await fetch(`${BACKEND_URL}/get-orders`);
+      if (!r.ok) throw new Error('Server error');
+      const orders = await r.json();
 
-      for (const msg of msgs) {
-        const txt = msg.text;
-        if (!txt || !txt.startsWith(TAG_ORDER)) continue;
-        const idMatch = txt.match(/ID:(\d+)/);
-        const id = idMatch ? parseInt(idMatch[1]) : 0;
-        if (delIds.includes(id)) continue;
-
-        const lines = txt.split('\n');
-        const get = (prefix) => {
-          const l = lines.find(x => x.startsWith(prefix));
-          return l ? l.replace(prefix, '').trim() : '—';
-        };
-        const amtMatch = txt.match(/💰 ([\d,]+) ကျပ်/);
-        const amount = amtMatch ? parseInt(amtMatch[1].replace(/,/g, '')) : 0;
-
-        orders.push({
-          id,
-          loginUser: get('👤 User: '),
-          time:      get('⏰ '),
-          recipient: get('🎁 လက်ခံသူ: '),
-          plan:      get('📦 Plan: '),
-          occasion:  get('🎀 Occasion: '),
-          details:   get('📝 စာ: '),
-          contact:   get('📲 ဆက်သွယ်ရန်: '),
-          account:   get('📱 Acc: '),
-          amount
-        });
-      }
-
-      // Sort by id ascending (Telegram-only, works on all devices)
-      orders.sort((a, b) => a.id - b.id);
+      // Sort oldest first, then reverse for display
+      orders.sort((a, b) => (a.id || 0) - (b.id || 0));
 
       if (orders.length === 0) {
         list.innerHTML = '<p style="text-align:center;color:var(--text-light);font-size:0.85rem;">မှတ်တမ်း မရှိသေးပါ</p>';
@@ -1824,20 +1805,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
       let total = 0;
       list.innerHTML = [...orders].reverse().map((o, i) => {
-        total += (o.amount || 0);
+        const amt = parseInt(o.amount) || 0;
+        total += amt;
+        const loginUser = o.loginUser || '—';
         return `<div class="order-record" id="ord_${o.id}">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
-            <strong>#${orders.length - i} &nbsp;⏰ ${o.time}</strong>
+            <strong>#${orders.length - i} &nbsp;⏰ ${o.time || '—'}</strong>
             <button onclick="deleteOrder(${o.id})" style="background:#fff0f0;border:1px solid #f5a8a8;color:#c0392b;border-radius:50px;padding:0.2rem 0.7rem;font-size:0.75rem;cursor:pointer;">🗑 ဖျက်</button>
           </div>
-          <div style="margin-bottom:0.3rem;">👤 <strong>${isPhoneNumber(o.loginUser) ? maskPhone(o.loginUser) : o.loginUser}</strong> <span class="order-user-tag">Website User</span></div>
-          🎁 ${o.recipient}<br>
-          📦 ${o.plan}<br>
-          🎀 ${o.occasion}<br>
-          📝 ${o.details}<br>
-          📲 ${o.contact}<br>
-          📱 ${o.account}<br>
-          <strong style="color:var(--pink-400);">💰 ${(o.amount||0).toLocaleString()} ကျပ်</strong>
+          <div style="margin-bottom:0.3rem;">👤 <strong>${isPhoneNumber(loginUser) ? maskPhone(loginUser) : loginUser}</strong> <span class="order-user-tag">Website User</span></div>
+          🎁 ${o.recipient || '—'}<br>
+          📦 ${o.planLabel || o.plan || '—'}<br>
+          🎀 ${o.occasion || '—'}<br>
+          📝 ${o.details || '—'}<br>
+          📲 ${o.contact || '—'}<br>
+          📱 ${o.account || '—'}<br>
+          <strong style="color:var(--pink-400);">💰 ${amt.toLocaleString()} ကျပ်</strong>
         </div>`;
       }).join('');
 
@@ -1898,8 +1881,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
   async function clearOrders() {
     if (!confirm('Order မှတ်တမ်း အကုန် ဖျက်မည်လား?')) return;
-    localStorage.removeItem(DEL_KEY);
-    await loadAdminRecords();
+    try {
+      await fetch(`${BACKEND_URL}/clear-orders`, { method: 'POST' });
+      localStorage.removeItem(DEL_KEY);
+      await loadAdminRecords();
+      showToast('✅ Order အကုန် ဖျက်ပြီးပါပြီ');
+    } catch {
+      showToast('⚠️ ဖျက်မရပါ — ထပ်ကြိုးစားပါ');
+    }
   }
 
   // Lock Soft Plan 10000 by default (only available for announce)
@@ -2332,4 +2321,4 @@ document.addEventListener('DOMContentLoaded', function() {
 }); // end DOMContentLoaded
 </script>
 </body>
-  </html>
+        </html>
