@@ -1896,49 +1896,19 @@ document.addEventListener('DOMContentLoaded', function() {
   function getDelIds() { return JSON.parse(localStorage.getItem(DEL_KEY) || '[]'); }
   function addDelId(id) { const a = getDelIds(); a.push(id); localStorage.setItem(DEL_KEY, JSON.stringify(a)); }
 
-  function copyOrderText(btn, text) {
-    const decoded = text.replace(/\\n/g, '\n');
-    navigator.clipboard.writeText(decoded).then(() => {
-      const orig = btn.textContent;
-      btn.textContent = '✅ Copied!';
-      btn.style.background = '#d4f5d4';
-      btn.style.color = '#27ae60';
-      setTimeout(() => {
-        btn.textContent = orig;
-        btn.style.background = 'var(--lavender)';
-        btn.style.color = 'var(--lavender-400)';
-      }, 2000);
-    });
-  }
-  window.copyOrderText = copyOrderText;
-
-  // ===== ORDER COUNTER (for serial ID) =====
-  async function getNextOrderNum() {
-    try {
-      const r = await fetch(`${BACKEND_URL}/get-orders`);
-      if (!r.ok) return 1;
-      const orders = await r.json();
-      return orders.length + 1;
-    } catch { return 1; }
-  }
-
   async function saveOrderRecord(data) {
     const ts = Date.now();
-    const orderNum = await getNextOrderNum();
-    const tgText = `${TAG_ORDER}|ID:${ts}
-━━━━━━━━━━━━━━━━━━━━━━━
-Order ID =d${orderNum}
-Users or phone no. = ${data.loginUser || '—'}
-Plan = ${data.planLabel}
-Time = ${data.time}
-Occasion = ${data.occasion}
-==============================
+    const text = `${TAG_ORDER}|ID:${ts}
+⏰ ${data.time}
+👤 User: ${data.loginUser || '—'}
 🎁 လက်ခံသူ: ${data.recipient || '—'}
+📦 Plan: ${data.planLabel}
+🎀 Occasion: ${data.occasion}
 📝 စာ: ${data.details || '—'}
 📲 ဆက်သွယ်ရန်: ${data.contact || '—'}
 📱 Acc: ${data.account}
 💰 ${parseInt(data.amount).toLocaleString()} ကျပ်`;
-    await tgSend(tgText);
+    await tgSend(text);
     // Also save to MongoDB
     try {
       await fetch(`${BACKEND_URL}/save-order`, {
@@ -1963,7 +1933,22 @@ Occasion = ${data.occasion}
     }
   }
 
-  async function loadAdminRecords() {
+  function copyOrderBlock(btn, text) {
+    navigator.clipboard.writeText(text).then(() => {
+      const orig = btn.textContent;
+      btn.textContent = '✅ Copied!';
+      btn.style.background = '#d4f5d4';
+      btn.style.color = '#27ae60';
+      setTimeout(() => {
+        btn.textContent = orig;
+        btn.style.background = 'var(--lavender)';
+        btn.style.color = 'var(--lavender-400)';
+      }, 2000);
+    });
+  }
+  window.copyOrderBlock = copyOrderBlock;
+
+    async function loadAdminRecords() {
     const list    = document.getElementById('adminOrderList');
     const totalEl = document.getElementById('adminTotalAmt');
     list.innerHTML = '<p style="text-align:center;color:var(--text-light);font-size:0.85rem;">⏳ မှတ်တမ်းများ ရယူနေသည်...</p>';
@@ -1989,28 +1974,29 @@ Occasion = ${data.occasion}
         const loginUser = o.loginUser || '—';
         const displayUser = isPhoneNumber(loginUser) ? maskPhone(loginUser) : loginUser;
         const orderNum = orders.length - i;
-        const copyText = `Order ID =d${orderNum}\nUsers or phone no. = ${loginUser}\nPlan = ${o.planLabel || o.plan || '—'}\nTime = ${o.time || '—'}\nOccasion = ${o.occasion || '—'}\n==============================\n🎁 လက်ခံသူ: ${o.recipient || '—'}\n📝 စာ: ${o.details || '—'}\n📲 ဆက်သွယ်ရန်: ${o.contact || '—'}\n📱 Acc: ${o.account || '—'}\n💰 ${amt.toLocaleString()} ကျပ်`;
+        const copyStr = `Order ID =d${orderNum}\nUsers or phone no. = ${loginUser}\nPlan = ${o.planLabel || o.plan || '—'}\nTime = ${o.time || '—'}\nOccasion = ${o.occasion || '—'}\n==============================\n🎁 လက်ခံသူ: ${o.recipient || '—'}\n📝 စာ: ${o.details || '—'}\n📲 ဆက်သွယ်ရန်: ${o.contact || '—'}\n📱 Acc: ${o.account || '—'}\n💰 ${amt.toLocaleString()} ကျပ်`;
+        const safeStr = copyStr.replace(/\\/g,'\\\\').replace(/`/g,'\\`');
         return `<div class="order-record" id="ord_${o.id}">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;gap:0.4rem;">
-            <div style="flex:1;">
-              <div style="font-size:0.95rem;font-weight:700;color:var(--pink-400);margin-bottom:0.15rem;">Order ID =d${orderNum}</div>
-              <div style="font-size:0.82rem;color:var(--text-mid);">Users or phone no. = <strong style="color:var(--text-dark);">${displayUser}</strong></div>
-              <div style="font-size:0.82rem;color:var(--text-mid);">Plan = <strong style="color:var(--text-dark);">${o.planLabel || o.plan || '—'}</strong></div>
-              <div style="font-size:0.82rem;color:var(--text-mid);">Time = ${o.time || '—'}</div>
-              <div style="font-size:0.82rem;color:var(--text-mid);">Occasion = ${o.occasion || '—'}</div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.4rem;margin-bottom:0.4rem;">
+            <div style="flex:1;font-size:0.85rem;line-height:1.7;">
+              <div style="font-weight:700;color:var(--pink-400);font-size:0.92rem;">Order ID =d${orderNum}</div>
+              <div>Users or phone no. = <strong>${displayUser}</strong></div>
+              <div>Plan = ${o.planLabel || o.plan || '—'}</div>
+              <div>Time = ${o.time || '—'}</div>
+              <div>Occasion = ${o.occasion || '—'}</div>
             </div>
-            <div style="display:flex;flex-direction:column;gap:0.3rem;align-items:flex-end;">
+            <div style="display:flex;flex-direction:column;gap:0.3rem;align-items:flex-end;flex-shrink:0;">
               <button onclick="deleteOrder(${o.id})" style="background:#fff0f0;border:1px solid #f5a8a8;color:#c0392b;border-radius:50px;padding:0.2rem 0.7rem;font-size:0.75rem;cursor:pointer;">🗑 ဖျက်</button>
-              <button onclick="copyOrderText(this, \`${copyText.replace(/`/g,'\\`').replace(/\n/g,'\\n')}\`)" style="background:var(--lavender);border:1px solid var(--lavender-200);color:var(--lavender-400);border-radius:50px;padding:0.2rem 0.7rem;font-size:0.75rem;cursor:pointer;">📋 Copy</button>
+              <button onclick="copyOrderBlock(this,\`${safeStr}\`)" style="background:var(--lavender);border:1px solid var(--lavender-200);color:var(--lavender-400);border-radius:50px;padding:0.2rem 0.7rem;font-size:0.75rem;cursor:pointer;">📋 Copy</button>
             </div>
           </div>
-          <div style="border-top:1.5px dashed var(--pink-200);margin:0.5rem 0;"></div>
+          <div style="border-top:1.5px dashed var(--pink-200);margin:0.4rem 0 0.5rem;"></div>
           <div style="font-size:0.85rem;color:var(--text-mid);line-height:1.8;">
-          🎁 ${o.recipient || '—'}<br>
-          📝 ${o.details || '—'}<br>
-          📲 ${o.contact || '—'}<br>
-          📱 ${o.account || '—'}<br>
-          <strong style="color:var(--pink-400);">💰 ${amt.toLocaleString()} ကျပ်</strong>
+            🎁 ${o.recipient || '—'}<br>
+            📝 ${o.details || '—'}<br>
+            📲 ${o.contact || '—'}<br>
+            📱 ${o.account || '—'}<br>
+            <strong style="color:var(--pink-400);">💰 ${amt.toLocaleString()} ကျပ်</strong>
           </div>
         </div>`;
       }).join('');
@@ -2512,4 +2498,4 @@ Occasion = ${data.occasion}
 }); // end DOMContentLoaded
 </script>
 </body>
-          </html>
+  </html>
