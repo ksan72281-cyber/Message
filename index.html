@@ -897,11 +897,12 @@
           <div style="flex:1; height:1px; background:var(--pink-100);"></div>
         </div>
 
-        <div id="telegram-login-container" style="display:flex; justify-content:center;">
+        <div id="telegram-login-container" style="display:flex; justify-content:center; align-items:center; background:linear-gradient(135deg,var(--pink-50),var(--lavender)); border:1.5px solid var(--pink-100); border-radius:16px; padding:0.9rem; margin-top:0.2rem;">
           <script async src="https://telegram.org/js/telegram-widget.js?22"
                   data-telegram-login="Message19337_bot"
-                  data-size="large"
+                  data-size="medium"
                   data-radius="20"
+                  data-userpic="false"
                   data-onauth="onTelegramAuth(user)"
                   data-request-access="write">
           </script>
@@ -1144,6 +1145,18 @@
       <p style="color:#7a5a7a; font-size:0.85rem; margin-top:0.8rem; padding:0 1rem;">🎬 Video message format</p>
     </div>
 
+    <!-- 7000 ကျပ် - New Vision - Video (sample placeholder) -->
+    <div style="background:white; border-radius:20px; overflow:hidden; border:1.5px solid #f09060; text-align:center; padding-bottom:1rem; box-shadow:0 4px 16px rgba(240,144,96,0.12);">
+      <div style="background:linear-gradient(135deg,#ffd4b8,#fad4e5); padding:0.8rem;">
+        <span style="font-size:1rem; color:#b8456e; font-weight:600;">✨ 7,000 ကျပ် New Vision နမူနာ</span>
+      </div>
+      <!-- New Vision video sample -->
+      <video controls style="width:100%; max-height:320px; display:block; background:#000;">
+        <source src="VID_20260712_061734_812.mp4" type="video/mp4">
+      </video>
+      <p style="color:#7a5a7a; font-size:0.85rem; margin-top:0.8rem; padding:0 1rem;">🎬 Video message format</p>
+    </div>
+
   </div>
 </section>
 
@@ -1202,20 +1215,20 @@
       <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center;" onclick="event.preventDefault(); smoothScrollTo('order');">မှာမည် 💜</a>
     </div>
 
-    <!-- 7000 Fast Plan -->
+    <!-- 7000 New Vision Plan -->
     <div class="pricing-card featured" style="border-color:#f09060; box-shadow:0 8px 30px rgba(240,144,96,0.2);">
-      <div class="featured-badge" style="background:linear-gradient(135deg,#f09060,#e0689a);">အမြန်</div>
-      <span class="plan-icon">⚡</span>
-      <div class="plan-name">Fast Plan</div>
-      <div class="plan-desc">အမြန်ကြေးထည့်ပြီး မြန်မြန်ရချင်သူများအတွက်</div>
+      <div class="featured-badge" style="background:linear-gradient(135deg,#f09060,#e0689a);">အသစ်</div>
+      <span class="plan-icon">✨</span>
+      <div class="plan-name">New Vision</div>
+      <div class="plan-desc">Design အသစ် — မွေးနေ့ / ချော့ / သူငယ်ချင်းအတွက်</div>
       <div class="plan-price" style="color:#f09060;">7,000 <span>ကျပ်</span></div>
       <ul class="plan-features">
         <li><span class="check" style="color:#f09060;">✿</span> ကိုယ်ပိုင် personalized message</li>
-        <li><span class="check" style="color:#f09060;">✿</span> မွေးနေ့ / ချော့ / သူငယ်ချင်းအတွက်</li>
+        <li><span class="check" style="color:#f09060;">✿</span> Design အသစ်</li>
         <li><span class="check" style="color:#f09060;">✿</span> Video message format</li>
-        <li><span class="check" style="color:#f09060;">✿</span> ⚡ Priority အမြန် ပို့ပေးမည်</li>
+        <li><span class="check" style="color:#f09060;">✿</span> ၂၄ နာရီ အတွင်း ပြန်ပို့</li>
       </ul>
-      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center; background:linear-gradient(135deg,#f09060,#e0689a);" onclick="event.preventDefault(); smoothScrollTo('order');">မှာမည် ⚡</a>
+      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center; background:linear-gradient(135deg,#f09060,#e0689a);" onclick="event.preventDefault(); smoothScrollTo('order');">မှာမည် ✨</a>
     </div>
 
     <!-- 10000 Soft Plan -->
@@ -1309,7 +1322,7 @@
         <option value="2000">🌷 Mini Plan — 2,000 ကျပ်</option>
         <option value="3000">🌸 Soft Plan — 3,000 ကျပ်</option>
         <option value="5000">💜 Soft Plan — 5,000 ကျပ်</option>
-        <option value="7000">⚡ Fast Plan — 7,000 ကျပ် (အမြန်ကြေး)</option>
+        <option value="7000">✨ New Vision — 7,000 ကျပ်</option>
         <option value="10000">🌟 Soft Plan — 10,000 ကျပ်</option>
         <option value="15000">🎀 Pin VD — 15,000 ကျပ်</option>
       </select>
@@ -1330,6 +1343,21 @@
       </div>
       <div id="songBox" style="display:none; margin-top:0.8rem;">
         <input type="text" id="songName" placeholder="သီချင်းအမည် ရေးပါ 🎵" style="width:100%; padding:0.8rem 1rem; border:1.5px solid var(--pink-400); border-radius:12px; font-family:'Noto Sans Myanmar',sans-serif; font-size:0.9rem; color:var(--text-dark); background:white; outline:none;">
+      </div>
+    </div>
+
+    <!-- ===== RUSH FEE ADDON ===== -->
+    <div class="form-group">
+      <label>🚀 အမြန်ကြေး ယူမလား? <span style="color:var(--pink-400); font-weight:400;">(+2,000 ကျပ်)</span></label>
+      <div style="display:flex; gap:1rem;">
+        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:600; background:white; border:1.5px solid var(--pink-100); border-radius:12px; padding:0.7rem 1.2rem; flex:1; justify-content:center; transition:all 0.2s;" id="rushYesLabel">
+          <input type="radio" name="rushAddon" id="rushYes" value="yes" onchange="toggleRushBox()" style="accent-color:var(--pink-400); width:16px; height:16px;">
+          ယူမယ်
+        </label>
+        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:600; background:var(--pink-50); border:1.5px solid var(--pink-400); border-radius:12px; padding:0.7rem 1.2rem; flex:1; justify-content:center; transition:all 0.2s;" id="rushNoLabel">
+          <input type="radio" name="rushAddon" id="rushNo" value="no" onchange="toggleRushBox()" style="accent-color:var(--pink-400); width:16px; height:16px;" checked>
+          မယူဘူး
+        </label>
       </div>
     </div>
 
@@ -2258,7 +2286,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const songYes = document.getElementById('songYes') && document.getElementById('songYes').checked;
     const songName = songYes ? (document.getElementById('songName').value.trim()) : '';
     const songAddonAmt = songYes ? 2000 : 0;
-    const totalAmt = (parseInt(plan) || 0) + songAddonAmt;
+
+    // Rush fee addon
+    const rushYes = document.getElementById('rushYes') && document.getElementById('rushYes').checked;
+    const rushAddonAmt = rushYes ? 2000 : 0;
+
+    const totalAmt = (parseInt(plan) || 0) + songAddonAmt + rushAddonAmt;
 
     if ((!recipient && !isNoRecipient) || !plan || !occasion || !account) {
       alert('⚠️ အချက်အလက်များ အားလုံးဖြည့်ပါ');
@@ -2317,6 +2350,7 @@ document.addEventListener('DOMContentLoaded', function() {
       await tgSend(`🎁 လက်ခံသူ: ${recipient || 'N/A'}`);
       await tgSend(`📦 Plan: ${plan} ကျပ်`);
       if (songYes) await tgSend(`🎵 သီချင်း: ${songName || '(မဖော်ပြ)'} — +2,000 ကျပ်`);
+      if (rushYes) await tgSend(`🚀 အမြန်ကြေး — +2,000 ကျပ်`);
       await tgSend(`💳 စုစုပေါင်း: ${totalAmt.toLocaleString()} ကျပ်`);
       await tgSend(`🎀 အကြောင်းအရာ: ${occasionText[occasion]}`);
       if (details) await tgSend(`📝 စာ / အချက်အလက်:\n${details}`);
@@ -2331,7 +2365,7 @@ document.addEventListener('DOMContentLoaded', function() {
       await tgSend(`✅ Order ပြီးဆုံးပါပြီ — စစ်ဆေးပေးပါ 🙏`);
 
       // ③ Structured order record (Telegram-backed, all devices)
-      const planLabels = {'2000':'Mini 2,000','3000':'Soft 3,000','5000':'Soft 5,000','7000':'Fast 7,000','15000':'Pin VD 15,000','10000':'Soft 10,000','20000':'Pin VD 20,000'};
+      const planLabels = {'2000':'Mini 2,000','3000':'Soft 3,000','5000':'Soft 5,000','7000':'New Vision 7,000','15000':'Pin VD 15,000','10000':'Soft 10,000','20000':'Pin VD 20,000'};
       await saveOrderRecord({
         time: new Date().toLocaleString('my-MM'),
         loginUser: loggedUser,
@@ -2360,6 +2394,10 @@ document.addEventListener('DOMContentLoaded', function() {
       if (songNoEl) { songNoEl.checked = true; toggleSongBox(); }
       const songNameEl = document.getElementById('songName');
       if (songNameEl) songNameEl.value = '';
+
+      // Reset rush fee addon
+      const rushNoEl = document.getElementById('rushNo');
+      if (rushNoEl) { rushNoEl.checked = true; toggleRushBox(); }
       updateTotal();
 
       // Reset file inputs
@@ -2504,9 +2542,24 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   window.toggleSongBox = toggleSongBox;
 
+  function toggleRushBox() {
+    const yes = document.getElementById('rushYes').checked;
+    const yesLabel = document.getElementById('rushYesLabel');
+    const noLabel = document.getElementById('rushNoLabel');
+    // Yes selected
+    yesLabel.style.borderColor = yes ? 'var(--pink-400)' : 'var(--pink-100)';
+    yesLabel.style.background = yes ? 'var(--pink-50)' : 'white';
+    // No selected
+    noLabel.style.borderColor = !yes ? 'var(--pink-400)' : 'var(--pink-100)';
+    noLabel.style.background = !yes ? 'var(--pink-50)' : 'white';
+    updateTotal();
+  }
+  window.toggleRushBox = toggleRushBox;
+
   function updateTotal() {
     const planVal = parseInt(document.getElementById('plan').value) || 0;
     const songAddon = document.getElementById('songYes') && document.getElementById('songYes').checked ? 2000 : 0;
+    const rushAddon = document.getElementById('rushYes') && document.getElementById('rushYes').checked ? 2000 : 0;
     const totalBox = document.getElementById('totalBox');
     const totalAmount = document.getElementById('totalAmount');
 
@@ -2515,11 +2568,15 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
-    const total = planVal + songAddon;
+    const total = planVal + songAddon + rushAddon;
     totalBox.style.display = 'block';
 
-    if (songAddon > 0) {
-      totalAmount.textContent = `💳 Plan ${planVal.toLocaleString()} + သီချင်း 2,000 = ${total.toLocaleString()} ကျပ်`;
+    const extras = [];
+    if (songAddon > 0) extras.push('သီချင်း 2,000');
+    if (rushAddon > 0) extras.push('အမြန်ကြေး 2,000');
+
+    if (extras.length > 0) {
+      totalAmount.textContent = `💳 Plan ${planVal.toLocaleString()} + ${extras.join(' + ')} = ${total.toLocaleString()} ကျပ်`;
     } else {
       totalAmount.textContent = `💳 စုစုပေါင်း ${total.toLocaleString()} ကျပ်`;
     }
@@ -2546,4 +2603,4 @@ document.addEventListener('DOMContentLoaded', function() {
 }); // end DOMContentLoaded
 </script>
 </body>
-</html>
+  </html>
