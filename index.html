@@ -878,11 +878,15 @@
           <div style="flex:1; height:1px; background:var(--pink-100);"></div>
         </div>
 
-        <div id="telegram-login-container" style="display:flex; justify-content:center; align-items:center; background:linear-gradient(135deg,var(--pink-50),var(--lavender)); border:1.5px solid var(--pink-100); border-radius:16px; padding:0.9rem; margin-top:0.2rem;">
-          <button type="button" onclick="startTelegramLogin()" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; background:#2AABEE; color:#fff; border:none; border-radius:20px; padding:0.55rem 1.4rem; font-family:'Noto Sans Myanmar',sans-serif; font-size:0.95rem; font-weight:600; cursor:pointer; box-shadow:0 2px 8px rgba(42,171,238,0.35);">
-            <svg width="20" height="20" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="120" cy="120" r="120" fill="#fff" fill-opacity="0.001"/><path d="M170 72L54 118c-8 3-8 8-1 10l30 9 12 37c1 4 3 5 7 2l17-15 25 19c5 3 8 1 9-5l17-97c2-7-3-10-9-8z" fill="#fff"/></svg>
-            Log in with Telegram
-          </button>
+        <div id="telegram-login-container" style="display:flex; justify-content:center; align-items:center; background:linear-gradient(135deg,var(--pink-50),var(--lavender)); border:1.5px solid var(--pink-100); border-radius:16px; padding:0.9rem; margin-top:0.2rem; color-scheme: light only; isolation:isolate; forced-color-adjust:none;">
+          <script async src="https://telegram.org/js/telegram-widget.js?22"
+                  data-telegram-login="Message19337_bot"
+                  data-size="medium"
+                  data-radius="20"
+                  data-userpic="false"
+                  data-onauth="onTelegramAuth(user)"
+                  data-request-access="write">
+          </script>
         </div>
       </div>
 
@@ -1701,42 +1705,6 @@ document.addEventListener('DOMContentLoaded', function() {
     updateNavUI();
     showToast('👋 Logout ထွက်ပြီးပါပြီ');
   }
-
-  // ===== TELEGRAM LOGIN — no-iframe OAuth redirect flow =====
-  const TG_BOT_ID = '8743380551';
-
-  function startTelegramLogin() {
-    const origin = window.location.origin;
-    const returnTo = window.location.origin + window.location.pathname;
-    const authUrl = 'https://oauth.telegram.org/auth?bot_id=' + encodeURIComponent(TG_BOT_ID) +
-      '&origin=' + encodeURIComponent(origin) +
-      '&embed=0&request_access=write' +
-      '&return_to=' + encodeURIComponent(returnTo);
-    window.location.href = authUrl;
-  }
-  window.startTelegramLogin = startTelegramLogin;
-
-  // Handle the redirect coming back from oauth.telegram.org with auth params in the URL
-  (function checkTelegramRedirectResult() {
-    const params = new URLSearchParams(window.location.search);
-    if (params.has('hash') && params.has('id')) {
-      const user = {
-        id: params.get('id'),
-        first_name: params.get('first_name') || '',
-        last_name: params.get('last_name') || '',
-        username: params.get('username') || '',
-        photo_url: params.get('photo_url') || '',
-        auth_date: params.get('auth_date'),
-        hash: params.get('hash')
-      };
-      // Clean the auth params out of the URL so they aren't left visible/bookmarked
-      const cleanUrl = window.location.origin + window.location.pathname;
-      window.history.replaceState({}, document.title, cleanUrl);
-      // Show the login panel then process the auth
-      if (typeof openAuth === 'function') openAuth();
-      onTelegramAuth(user);
-    }
-  })();
 
   // ===== TELEGRAM LOGIN WIDGET CALLBACK =====
   async function onTelegramAuth(user) {
@@ -2652,6 +2620,72 @@ document.addEventListener('DOMContentLoaded', function() {
   window.handleOrder = handleOrder;
   window.showChangePw = showChangePw;
 }); // end DOMContentLoaded
+
+// ===== ROBUST PASSWORD MASKING (works even on browsers that ignore
+// native type="password" masking, e.g. some Chinese lite/mini browsers) =====
+// Instead of depending on the browser to mask the field, we make the
+// real characters invisible (color: transparent — a very basic CSS
+// property every browser supports) and draw our own "•••" dots on top.
+(function() {
+  function maskify(input) {
+    if (input.dataset.pwMasked) return;
+    input.dataset.pwMasked = '1';
+
+    const cs = getComputedStyle(input);
+
+    // Wrap the input so we can position an overlay on top of it,
+    // moving its bottom margin to the wrapper to keep spacing intact.
+    const wrap = document.createElement('div');
+    wrap.style.position = 'relative';
+    wrap.style.width = '100%';
+    wrap.style.marginBottom = cs.marginBottom;
+    input.style.marginBottom = '0';
+    input.parentNode.insertBefore(wrap, input);
+    wrap.appendChild(input);
+
+    // Hide the real characters (still fully functional / submits real value)
+    input.style.position = 'relative';
+    input.style.zIndex = '1';
+    input.style.color = 'transparent';
+    input.style.webkitTextFillColor = 'transparent';
+    input.style.caretColor = cs.color;
+
+    // Draw fake dots on top, matching the input's box/font exactly
+    const overlay = document.createElement('div');
+    overlay.style.position = 'absolute';
+    overlay.style.inset = '0';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.padding = cs.padding;
+    overlay.style.fontFamily = cs.fontFamily;
+    overlay.style.fontSize = cs.fontSize;
+    overlay.style.letterSpacing = '2px';
+    overlay.style.color = cs.color;
+    overlay.style.pointerEvents = 'none';
+    overlay.style.whiteSpace = 'pre';
+    overlay.style.overflow = 'hidden';
+    overlay.style.zIndex = '2';
+    wrap.appendChild(overlay);
+
+    function update() { overlay.textContent = '•'.repeat(input.value.length); }
+    input.addEventListener('input', update);
+    update();
+  }
+
+  function maskAll() {
+    document.querySelectorAll('input[type="password"]').forEach(maskify);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', maskAll);
+  } else {
+    maskAll();
+  }
+
+  // Catch password fields that get shown/created later (e.g. modals
+  // opened after page load, like the admin panel or register form)
+  new MutationObserver(maskAll).observe(document.body, { childList: true, subtree: true });
+})();
 </script>
 </body>
   </html>
