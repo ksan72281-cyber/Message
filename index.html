@@ -661,41 +661,9 @@
     cursor: pointer; float: right;
   }
 
-  /* ===== RAINBOW LOGIN PANEL ===== */
-  @keyframes rainbowBorder {
-    0%   { border-color: #f5a8cb; box-shadow: 0 16px 50px rgba(245,168,203,0.35); }
-    16%  { border-color: #d8c8f8; box-shadow: 0 16px 50px rgba(216,200,248,0.35); }
-    33%  { border-color: #ffd4b8; box-shadow: 0 16px 50px rgba(255,212,184,0.35); }
-    50%  { border-color: #b8f0e0; box-shadow: 0 16px 50px rgba(184,240,224,0.30); }
-    66%  { border-color: #f8d8f0; box-shadow: 0 16px 50px rgba(248,216,240,0.35); }
-    83%  { border-color: #c8d8f8; box-shadow: 0 16px 50px rgba(200,216,248,0.35); }
-    100% { border-color: #f5a8cb; box-shadow: 0 16px 50px rgba(245,168,203,0.35); }
-  }
-
-  @keyframes rainbowGlow {
-    0%   { background: linear-gradient(135deg,#fdf0f5,#f0eaff); }
-    25%  { background: linear-gradient(135deg,#f0eaff,#fff3ed); }
-    50%  { background: linear-gradient(135deg,#fff3ed,#edfdf5); }
-    75%  { background: linear-gradient(135deg,#edfdf5,#f0eaff); }
-    100% { background: linear-gradient(135deg,#fdf0f5,#f0eaff); }
-  }
-
-  @keyframes rainbowBtn {
-    0%   { background: linear-gradient(135deg,#e0689a,#9b7be8); }
-    25%  { background: linear-gradient(135deg,#9b7be8,#f09060); }
-    50%  { background: linear-gradient(135deg,#f09060,#60c0e0); }
-    75%  { background: linear-gradient(135deg,#60c0e0,#e0689a); }
-    100% { background: linear-gradient(135deg,#e0689a,#9b7be8); }
-  }
-
+  /* ===== LOGIN PANEL (steady, no color-shift) ===== */
   #authPanel {
-    animation: rainbowBorder 4s linear infinite, rainbowGlow 4s linear infinite !important;
     border: 2.5px solid #f5a8cb !important;
-  }
-
-  #authPanel .auth-btn {
-    animation: rainbowBtn 3s linear infinite !important;
-    background-size: 200% 200%;
   }
 
   /* ===== USER AUTH MODAL ===== */
@@ -1324,7 +1292,6 @@
         <option value="5000">💜 Soft Plan — 5,000 ကျပ်</option>
         <option value="7000">✨ New Vision — 7,000 ကျပ်</option>
         <option value="10000">🌟 Soft Plan — 10,000 ကျပ်</option>
-        <option value="15000">🎀 Pin VD — 15,000 ကျပ်</option>
       </select>
     </div>
 
@@ -1356,6 +1323,21 @@
         </label>
         <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:600; background:var(--pink-50); border:1.5px solid var(--pink-400); border-radius:12px; padding:0.7rem 1.2rem; flex:1; justify-content:center; transition:all 0.2s;" id="rushNoLabel">
           <input type="radio" name="rushAddon" id="rushNo" value="no" onchange="toggleRushBox()" style="accent-color:var(--pink-400); width:16px; height:16px;" checked>
+          မယူဘူး
+        </label>
+      </div>
+    </div>
+
+    <!-- ===== PIN VD ADDON ===== -->
+    <div class="form-group">
+      <label>🎀 Pin VD ယူမလား? <span style="color:var(--pink-400); font-weight:400;">(+15,000 ကျပ်)</span></label>
+      <div style="display:flex; gap:1rem;">
+        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:600; background:white; border:1.5px solid var(--pink-100); border-radius:12px; padding:0.7rem 1.2rem; flex:1; justify-content:center; transition:all 0.2s;" id="pinvdYesLabel">
+          <input type="radio" name="pinvdAddon" id="pinvdYes" value="yes" onchange="togglePinvdBox()" style="accent-color:var(--pink-400); width:16px; height:16px;">
+          ယူမယ်
+        </label>
+        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:600; background:var(--pink-50); border:1.5px solid var(--pink-400); border-radius:12px; padding:0.7rem 1.2rem; flex:1; justify-content:center; transition:all 0.2s;" id="pinvdNoLabel">
+          <input type="radio" name="pinvdAddon" id="pinvdNo" value="no" onchange="togglePinvdBox()" style="accent-color:var(--pink-400); width:16px; height:16px;" checked>
           မယူဘူး
         </label>
       </div>
@@ -1951,10 +1933,18 @@ document.addEventListener('DOMContentLoaded', function() {
   const CID = '-1003738737262';
   const TAG_ORDER = '🗂MFY_ORDER🗂';
 
+  function escapeHtmlForTg(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
   async function tgSend(text) {
+    const monoText = `<pre>${escapeHtmlForTg(text)}</pre>`;
     const r = await fetch(`https://api.telegram.org/bot${BOT}/sendMessage`, {
       method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ chat_id: CID, text })
+      body: JSON.stringify({ chat_id: CID, text: monoText, parse_mode: 'HTML' })
     });
     const d = await r.json();
     return d.result ? d.result.message_id : null;
@@ -2199,11 +2189,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const allOpts = planSelect.querySelectorAll('option');
 
-    const restorePin = () => {
-      const pOpt = planSelect.querySelector('option[value="20000"]') || planSelect.querySelector('option[value="15000"]');
-      if (pOpt) { pOpt.value = '15000'; pOpt.textContent = '🎀 Pin VD — 15,000 ကျပ်'; }
-    };
-
     if (val === 'find' || val === 'announce') {
       // Disable recipient input
       recipientInput.disabled = true;
@@ -2213,17 +2198,14 @@ document.addEventListener('DOMContentLoaded', function() {
       recipientLabel.textContent = labels[val] + ' (လက်ခံသူအမည် ထည့်စရာမလိုပါ)';
 
       if (val === 'find') {
-          restorePin();
           allOpts.forEach(o => {
-            const allowed = ['5000', '7000', '15000'];
+            const allowed = ['5000', '7000'];
             o.disabled = o.value !== '' && !allowed.includes(o.value);
           });
           planSelect.value = '5000';
       } else {
-          const pinOpt = planSelect.querySelector('option[value="15000"]');
-          if (pinOpt) { pinOpt.value = '20000'; pinOpt.textContent = '🎀 Pin VD — 20,000 ကျပ်'; }
           allOpts.forEach(o => {
-            const allowed = ['10000', '20000'];
+            const allowed = ['10000'];
             o.disabled = o.value !== '' && !allowed.includes(o.value);
           });
           planSelect.value = '10000';
@@ -2234,11 +2216,10 @@ document.addEventListener('DOMContentLoaded', function() {
       recipientInput.placeholder = '@username';
       recipientInput.style.background = '';
       recipientLabel.textContent = 'လက်ခံသူ TikTok / Telegram Username *';
-      restorePin();
       allOpts.forEach(o => {
         o.disabled = (o.value === '10000');
       });
-      if (planSelect.value === '10000' || planSelect.value === '20000') planSelect.value = '';
+      if (planSelect.value === '10000') planSelect.value = '';
     }
   }
 
@@ -2291,7 +2272,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const rushYes = document.getElementById('rushYes') && document.getElementById('rushYes').checked;
     const rushAddonAmt = rushYes ? 2000 : 0;
 
-    const totalAmt = (parseInt(plan) || 0) + songAddonAmt + rushAddonAmt;
+    // Pin VD addon
+    const pinvdYes = document.getElementById('pinvdYes') && document.getElementById('pinvdYes').checked;
+    const pinvdAddonAmt = pinvdYes ? 15000 : 0;
+
+    const totalAmt = (parseInt(plan) || 0) + songAddonAmt + rushAddonAmt + pinvdAddonAmt;
 
     if ((!recipient && !isNoRecipient) || !plan || !occasion || !account) {
       alert('⚠️ အချက်အလက်များ အားလုံးဖြည့်ပါ');
@@ -2351,6 +2336,7 @@ document.addEventListener('DOMContentLoaded', function() {
       await tgSend(`📦 Plan: ${plan} ကျပ်`);
       if (songYes) await tgSend(`🎵 သီချင်း: ${songName || '(မဖော်ပြ)'} — +2,000 ကျပ်`);
       if (rushYes) await tgSend(`🚀 အမြန်ကြေး — +2,000 ကျပ်`);
+      if (pinvdYes) await tgSend(`🎀 Pin VD — +15,000 ကျပ်`);
       await tgSend(`💳 စုစုပေါင်း: ${totalAmt.toLocaleString()} ကျပ်`);
       await tgSend(`🎀 အကြောင်းအရာ: ${occasionText[occasion]}`);
       if (details) await tgSend(`📝 စာ / အချက်အလက်:\n${details}`);
@@ -2365,7 +2351,7 @@ document.addEventListener('DOMContentLoaded', function() {
       await tgSend(`✅ Order ပြီးဆုံးပါပြီ — စစ်ဆေးပေးပါ 🙏`);
 
       // ③ Structured order record (Telegram-backed, all devices)
-      const planLabels = {'2000':'Mini 2,000','3000':'Soft 3,000','5000':'Soft 5,000','7000':'New Vision 7,000','15000':'Pin VD 15,000','10000':'Soft 10,000','20000':'Pin VD 20,000'};
+      const planLabels = {'2000':'Mini 2,000','3000':'Soft 3,000','5000':'Soft 5,000','7000':'New Vision 7,000','10000':'Soft 10,000'};
       await saveOrderRecord({
         time: new Date().toLocaleString('my-MM'),
         loginUser: loggedUser,
@@ -2398,6 +2384,10 @@ document.addEventListener('DOMContentLoaded', function() {
       // Reset rush fee addon
       const rushNoEl = document.getElementById('rushNo');
       if (rushNoEl) { rushNoEl.checked = true; toggleRushBox(); }
+
+      // Reset Pin VD addon
+      const pinvdNoEl = document.getElementById('pinvdNo');
+      if (pinvdNoEl) { pinvdNoEl.checked = true; togglePinvdBox(); }
       updateTotal();
 
       // Reset file inputs
@@ -2556,10 +2546,25 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   window.toggleRushBox = toggleRushBox;
 
+  function togglePinvdBox() {
+    const yes = document.getElementById('pinvdYes').checked;
+    const yesLabel = document.getElementById('pinvdYesLabel');
+    const noLabel = document.getElementById('pinvdNoLabel');
+    // Yes selected
+    yesLabel.style.borderColor = yes ? 'var(--pink-400)' : 'var(--pink-100)';
+    yesLabel.style.background = yes ? 'var(--pink-50)' : 'white';
+    // No selected
+    noLabel.style.borderColor = !yes ? 'var(--pink-400)' : 'var(--pink-100)';
+    noLabel.style.background = !yes ? 'var(--pink-50)' : 'white';
+    updateTotal();
+  }
+  window.togglePinvdBox = togglePinvdBox;
+
   function updateTotal() {
     const planVal = parseInt(document.getElementById('plan').value) || 0;
     const songAddon = document.getElementById('songYes') && document.getElementById('songYes').checked ? 2000 : 0;
     const rushAddon = document.getElementById('rushYes') && document.getElementById('rushYes').checked ? 2000 : 0;
+    const pinvdAddon = document.getElementById('pinvdYes') && document.getElementById('pinvdYes').checked ? 15000 : 0;
     const totalBox = document.getElementById('totalBox');
     const totalAmount = document.getElementById('totalAmount');
 
@@ -2568,12 +2573,13 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
-    const total = planVal + songAddon + rushAddon;
+    const total = planVal + songAddon + rushAddon + pinvdAddon;
     totalBox.style.display = 'block';
 
     const extras = [];
     if (songAddon > 0) extras.push('သီချင်း 2,000');
     if (rushAddon > 0) extras.push('အမြန်ကြေး 2,000');
+    if (pinvdAddon > 0) extras.push('Pin VD 15,000');
 
     if (extras.length > 0) {
       totalAmount.textContent = `💳 Plan ${planVal.toLocaleString()} + ${extras.join(' + ')} = ${total.toLocaleString()} ကျပ်`;
