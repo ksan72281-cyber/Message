@@ -734,14 +734,6 @@
   }
   .auth-input:focus { border-color: var(--pink-400); }
 
-  /* Force dot-masking on password fields even in browsers (e.g. some
-     Chinese "lite/mini" browsers like UC Browser, QQ Browser, Baidu
-     Browser) that don't fully honor the native type="password" masking */
-  input[type="password"] {
-    -webkit-text-security: disc;
-    text-security: disc;
-  }
-
   .auth-label {
     font-size: 0.8rem; color: var(--text-mid);
     font-weight: 600; margin-bottom: 0.3rem; display: block;
@@ -2628,6 +2620,72 @@ document.addEventListener('DOMContentLoaded', function() {
   window.handleOrder = handleOrder;
   window.showChangePw = showChangePw;
 }); // end DOMContentLoaded
+
+// ===== ROBUST PASSWORD MASKING (works even on browsers that ignore
+// native type="password" masking, e.g. some Chinese lite/mini browsers) =====
+// Instead of depending on the browser to mask the field, we make the
+// real characters invisible (color: transparent — a very basic CSS
+// property every browser supports) and draw our own "•••" dots on top.
+(function() {
+  function maskify(input) {
+    if (input.dataset.pwMasked) return;
+    input.dataset.pwMasked = '1';
+
+    const cs = getComputedStyle(input);
+
+    // Wrap the input so we can position an overlay on top of it,
+    // moving its bottom margin to the wrapper to keep spacing intact.
+    const wrap = document.createElement('div');
+    wrap.style.position = 'relative';
+    wrap.style.width = '100%';
+    wrap.style.marginBottom = cs.marginBottom;
+    input.style.marginBottom = '0';
+    input.parentNode.insertBefore(wrap, input);
+    wrap.appendChild(input);
+
+    // Hide the real characters (still fully functional / submits real value)
+    input.style.position = 'relative';
+    input.style.zIndex = '1';
+    input.style.color = 'transparent';
+    input.style.webkitTextFillColor = 'transparent';
+    input.style.caretColor = cs.color;
+
+    // Draw fake dots on top, matching the input's box/font exactly
+    const overlay = document.createElement('div');
+    overlay.style.position = 'absolute';
+    overlay.style.inset = '0';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.padding = cs.padding;
+    overlay.style.fontFamily = cs.fontFamily;
+    overlay.style.fontSize = cs.fontSize;
+    overlay.style.letterSpacing = '2px';
+    overlay.style.color = cs.color;
+    overlay.style.pointerEvents = 'none';
+    overlay.style.whiteSpace = 'pre';
+    overlay.style.overflow = 'hidden';
+    overlay.style.zIndex = '2';
+    wrap.appendChild(overlay);
+
+    function update() { overlay.textContent = '•'.repeat(input.value.length); }
+    input.addEventListener('input', update);
+    update();
+  }
+
+  function maskAll() {
+    document.querySelectorAll('input[type="password"]').forEach(maskify);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', maskAll);
+  } else {
+    maskAll();
+  }
+
+  // Catch password fields that get shown/created later (e.g. modals
+  // opened after page load, like the admin panel or register form)
+  new MutationObserver(maskAll).observe(document.body, { childList: true, subtree: true });
+})();
 </script>
 </body>
   </html>
