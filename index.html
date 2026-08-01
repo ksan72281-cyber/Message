@@ -40,7 +40,7 @@
   }
 
   body {
-    padding-bottom: 190px;
+    padding-bottom: 100px;
     font-family: 'Noto Sans Myanmar', sans-serif;
     background: var(--cream);
     color: var(--text-dark);
@@ -69,7 +69,6 @@
     background: radial-gradient(circle, rgba(224,104,154,0.12) 0%, transparent 70%);
     top: -100px; right: -100px;
     animation: float 8s ease-in-out infinite;
-    pointer-events: none;
   }
 
   .hero::after {
@@ -80,7 +79,6 @@
     background: radial-gradient(circle, rgba(155,123,232,0.1) 0%, transparent 70%);
     bottom: -50px; left: -50px;
     animation: float 10s ease-in-out infinite reverse;
-    pointer-events: none;
   }
 
   @keyframes float {
@@ -163,8 +161,6 @@
     gap: 1rem;
     flex-wrap: wrap;
     justify-content: center;
-    position: relative;
-    z-index: 2;
   }
 
   .btn-group .btn-primary,
@@ -540,6 +536,12 @@
   }
 
   .nav-links a:hover { color: var(--pink-400); }
+
+  #langToggleBtn {
+    justify-content: flex-end;
+    font-weight: 600;
+    color: var(--pink-400);
+  }
 
   .hero { padding-top: 6rem; }
 
@@ -1025,7 +1027,7 @@
 
   <div class="btn-group">
     <button class="btn-primary i18n" data-en="View Prices ↓" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'});">စျေးနှုန်းများကြည့်ရန် ↓</button>
-    <button class="btn-secondary i18n" data-en="View Samples ↓" onclick="document.getElementById('videoSamples').scrollIntoView({behavior:'smooth'});">နမူနာများကြည့်ရန် ↓</button>
+    <button class="btn-secondary i18n" data-en="View Samples ↓" onclick="document.getElementById('samples').scrollIntoView({behavior:'smooth'});">နမူနာများကြည့်ရန် ↓</button>
   </div>
 </section>
 
@@ -1097,7 +1099,7 @@
   </div>
 
   <!-- နမူနာ Media -->
-  <div id="videoSamples" style="max-width:900px; margin:2rem auto 0; display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5rem; padding:0 1rem;">
+  <div style="max-width:900px; margin:2rem auto 0; display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5rem; padding:0 1rem;">
 
     <!-- 2000 ကျပ် - ပုံ -->
     <div style="background:white; border-radius:20px; overflow:hidden; border:1.5px solid #f5a8cb; text-align:center; padding-bottom:1rem; box-shadow:0 4px 16px rgba(224,104,154,0.1);">
@@ -1416,7 +1418,7 @@
       <label style="white-space:nowrap; font-size:0.8rem;">Acc Profile ပုံ / လူပုံ 📸 <span style="font-weight:400; color:var(--pink-400);">(မိမိထည့်ချင်သောပုံ)</span></label>
       <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
         <input type="file" accept="image/*" id="photo1" style="padding:0.6rem 1rem; cursor:pointer; flex:1;">
-        <label id="noPhoto1Wrap" style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
+        <label style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
           <input type="checkbox" id="noPhoto1" onchange="document.getElementById('photo1').disabled=this.checked; document.getElementById('photo1').value='';">
           မရှိဘူး
         </label>
@@ -1427,7 +1429,7 @@
       <label style="white-space:nowrap; font-size:0.8rem;">Acc Profile ပုံ / လူပုံ ၂ 📸 <span style="font-weight:400; color:var(--pink-400);">(မိမိထည့်ချင်သောပုံ)</span></label>
       <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
         <input type="file" accept="image/*" id="photo2" style="padding:0.6rem 1rem; cursor:pointer; flex:1;">
-        <label id="noPhoto2Wrap" style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
+        <label style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
           <input type="checkbox" id="noPhoto2" onchange="document.getElementById('photo2').disabled=this.checked; document.getElementById('photo2').value='';">
           မရှိဘူး
         </label>
@@ -1440,7 +1442,7 @@
         <label style="white-space:nowrap; font-size:0.8rem;">Acc Profile ပုံ / လူပုံ ၃ 📸 <span style="font-weight:400; color:var(--pink-400);">(မိမိထည့်ချင်သောပုံ)</span></label>
         <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
           <input type="file" accept="image/*" id="photo3" style="padding:0.6rem 1rem; cursor:pointer; flex:1;">
-          <label id="noPhoto3Wrap" style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
+          <label style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
             <input type="checkbox" id="noPhoto3" onchange="document.getElementById('photo3').disabled=this.checked; document.getElementById('photo3').value='';">
             မရှိဘူး
           </label>
@@ -1451,7 +1453,7 @@
         <label style="white-space:nowrap; font-size:0.8rem;">Acc Profile ပုံ / လူပုံ ၄ 📸 <span style="font-weight:400; color:var(--pink-400);">(မိမိထည့်ချင်သောပုံ)</span></label>
         <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
           <input type="file" accept="image/*" id="photo4" style="padding:0.6rem 1rem; cursor:pointer; flex:1;">
-          <label id="noPhoto4Wrap" style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
+          <label style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
             <input type="checkbox" id="noPhoto4" onchange="document.getElementById('photo4').disabled=this.checked; document.getElementById('photo4').value='';">
             မရှိဘူး
           </label>
@@ -1462,7 +1464,7 @@
         <label style="white-space:nowrap; font-size:0.8rem;">Acc Profile ပုံ / လူပုံ ၅ 📸 <span style="font-weight:400; color:var(--pink-400);">(မိမိထည့်ချင်သောပုံ)</span></label>
         <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
           <input type="file" accept="image/*" id="photo5" style="padding:0.6rem 1rem; cursor:pointer; flex:1;">
-          <label id="noPhoto5Wrap" style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
+          <label style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
             <input type="checkbox" id="noPhoto5" onchange="document.getElementById('photo5').disabled=this.checked; document.getElementById('photo5').value='';">
             မရှိဘူး
           </label>
@@ -1506,23 +1508,17 @@
   background: linear-gradient(135deg, #e0689a, #9b7be8);
   color: white;
   text-align: center;
-  padding: 0.8rem 1rem;
+  padding: 0.9rem 1rem;
   z-index: 200;
   box-shadow: 0 -4px 20px rgba(224,104,154,0.4);
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
+  gap: 0.8rem;
+  flex-wrap: wrap;
   transition: transform 0.25s ease;
 ">
-  <a href="https://t.me/xinxin2233" target="_blank" style="display:flex; align-items:center; justify-content:center; text-decoration:none;">
-    <img src="stick/1000026474-removebg-preview.png" alt="sticker" style="height:34px; width:auto; display:block; margin-right:-14px; position:relative; z-index:1;">
-    <img src="stick/1000026475-removebg-preview.png" alt="sticker" style="height:34px; width:auto; display:block;">
-  </a>
-  <a href="https://t.me/xinxin2233" target="_blank" style="text-decoration:none; color:white; font-size: 0.9rem; font-family: 'Noto Sans Myanmar', sans-serif; line-height:1.4; max-width:320px;">
-    <strong>Starlight card တွေ ရောင်းမယ်/ဝယ်မယ်ဆို <span style="white-space:nowrap;">မင်မင်စီ ဆက်သွယ်ရန်</span></strong>
-  </a>
+  <span style="font-size: 0.9rem; font-family: 'Noto Sans Myanmar', sans-serif;">📢 <strong>မင်မင်တို့ websiteမှာ ကြေငြာအပ်ချင်ရင် ဆက်သွယ်ရန်ကိုနှိပ်ပါ</strong></span>
   <a href="https://t.me/xinxin2233" target="_blank" style="
     background: white;
     color: #e0689a;
@@ -2162,7 +2158,6 @@ document.addEventListener('DOMContentLoaded', function() {
       list.innerHTML = '<p style="text-align:center;color:#e74c3c;font-size:0.85rem;">⚠️ ရယူမရပါ — ပြန်ကြိုးစားပါ</p>';
     }
   }
-  window.loadAdminRecords = loadAdminRecords;
 
   async function loadAdminUsers() {
     const list = document.getElementById('adminUserList');
@@ -2389,11 +2384,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!payslip) {
       alert('⚠️ ငွေလွဲပြေစာ ပုံ ထည့်ပါ');
-      return;
-    }
-
-    if (plan === '8000' && (!photo1 || !photo2 || !photo3 || !photo4 || !photo5)) {
-      alert('⚠️ 8,000 ကျပ် Web Vision plan အတွက် ပုံ ၅ ပုံလုံး ထည့်မှ order တင်နိုင်ပါသည်');
       return;
     }
 
@@ -2709,22 +2699,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (cb) cb.checked = false;
       });
     }
-
-    // 8,000 ကျပ် Web Vision plan — ပုံ ၅ ပုံလုံး မဖြစ်မနေထည့်ရမည် ဖြစ်၍
-    // "မရှိဘူး" checkbox ကို ပုံငါးပုံလုံးအတွက် ဖျောက်ပေး/uncheck ပြန်ဖွင့်ပေးမည်
-    [1,2,3,4,5].forEach(n => {
-      const cbWrap = document.getElementById('noPhoto' + n + 'Wrap');
-      const cb = document.getElementById('noPhoto' + n);
-      const photoEl = document.getElementById('photo' + n);
-      if (!cbWrap || !cb) return;
-      if (show) {
-        cbWrap.style.display = 'none';
-        cb.checked = false;
-        if (photoEl) photoEl.disabled = false;
-      } else {
-        cbWrap.style.display = 'flex';
-      }
-    });
   }
   window.toggleExtraPhotoFields = toggleExtraPhotoFields;
 
@@ -2732,7 +2706,36 @@ document.addEventListener('DOMContentLoaded', function() {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   }
-  window.smoothScrollTo = smoothScrollTo;
+
+  // ===== Language toggle (Myanmar <-> English) =====
+  let currentLang = 'my';
+  function toggleLang() {
+    currentLang = (currentLang === 'my') ? 'en' : 'my';
+    document.querySelectorAll('.i18n').forEach(el => {
+      if (!el.dataset.myOrig) el.dataset.myOrig = el.innerHTML;
+      if (currentLang === 'en' && el.dataset.en) {
+        el.innerHTML = el.dataset.en;
+      } else {
+        el.innerHTML = el.dataset.myOrig;
+      }
+    });
+    document.querySelectorAll('[data-placeholder-en]').forEach(el => {
+      if (!el.dataset.placeholderMy) el.dataset.placeholderMy = el.getAttribute('placeholder') || '';
+      el.setAttribute('placeholder', currentLang === 'en' ? el.dataset.placeholderEn : el.dataset.placeholderMy);
+    });
+    const flag = document.getElementById('langFlag');
+    const label = document.getElementById('langLabel');
+    if (currentLang === 'en') {
+      flag.textContent = '🇲🇲';
+      label.textContent = 'မြန်မာ';
+      document.documentElement.lang = 'en';
+    } else {
+      flag.textContent = '🇬🇧';
+      label.textContent = 'English';
+      document.documentElement.lang = 'my';
+    }
+  }
+  window.toggleLang = toggleLang;
 
 
   // Expose functions globally for inline onclick handlers
