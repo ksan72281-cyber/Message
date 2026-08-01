@@ -537,6 +537,77 @@
 
   .nav-links a:hover { color: var(--pink-400); }
 
+  /* ===== CORNER HAMBURGER MENU ===== */
+  #cornerMenuBtn {
+    position: fixed;
+    top: 0.8rem;
+    left: 0.8rem;
+    z-index: 500;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, var(--pink-400), var(--lavender-400));
+    color: white;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(224,104,154,0.35);
+  }
+
+  #cornerMenuPanel {
+    position: fixed;
+    top: 4.2rem;
+    left: 0.8rem;
+    z-index: 500;
+    background: white;
+    border-radius: 18px;
+    border: 1.5px solid var(--pink-100);
+    box-shadow: 0 10px 40px rgba(61,43,61,0.18);
+    min-width: 230px;
+    padding: 0.6rem;
+    display: none;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  #cornerMenuPanel.open { display: flex; }
+
+  #cornerMenuPanel a, #cornerMenuPanel button.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.7rem 0.8rem;
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--text-dark);
+    font-size: 0.88rem;
+    font-family: 'Noto Sans Myanmar', sans-serif;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+  }
+
+  #cornerMenuPanel a:hover, #cornerMenuPanel button.menu-item:hover {
+    background: var(--pink-50);
+  }
+
+  #cornerMenuPanel hr {
+    border: none;
+    border-top: 1px solid var(--pink-100);
+    margin: 0.35rem 0;
+  }
+
+  #langToggleBtn {
+    justify-content: flex-end;
+    font-weight: 600;
+    color: var(--pink-400);
+  }
+
   .hero { padding-top: 6rem; }
 
   /* ===== TOAST ===== */
@@ -579,6 +650,7 @@
   @media (max-width: 600px) {
     .form-row { grid-template-columns: 1fr; }
     .nav-links { display: none; }
+    .nav-brand { margin-left: 3.2rem; font-size: 0.95rem; }
   }
 
   /* ===== ADMIN PANEL ===== */
@@ -989,9 +1061,9 @@
 <nav>
   <div class="nav-brand">𝑴𝒆𝒔𝒔𝒂𝒈𝒆 𝒇𝒐𝒓 𝒚𝒐𝒖ᥫ᭡</div>
   <ul class="nav-links">
-    <li><a href="#samples" onclick="event.preventDefault(); smoothScrollTo('samples');">နမူနာ</a></li>
-    <li><a href="#pricing" onclick="event.preventDefault(); smoothScrollTo('pricing');">စျေးနှုန်း</a></li>
-    <li><a href="#order" onclick="event.preventDefault(); smoothScrollTo('order');">မှာယူမည်</a></li>
+    <li><a href="#samples" onclick="event.preventDefault(); smoothScrollTo('samples');" class="i18n" data-en="Samples">နမူနာ</a></li>
+    <li><a href="#pricing" onclick="event.preventDefault(); smoothScrollTo('pricing');" class="i18n" data-en="Pricing">စျေးနှုန်း</a></li>
+    <li><a href="#order" onclick="event.preventDefault(); smoothScrollTo('order');" class="i18n" data-en="Order">မှာယူမည်</a></li>
   </ul>
   <div id="userBadge" onclick="openAuth()">
     <span>👤</span><span id="userBadgeName"></span>
@@ -999,95 +1071,113 @@
   <button id="navLoginBtn" onclick="openAuth()" style="background:linear-gradient(135deg,var(--pink-400),var(--lavender-400)); color:white; border:none; border-radius:50px; padding:0.35rem 1rem; font-size:0.82rem; font-family:'Noto Sans Myanmar',sans-serif; cursor:pointer;">Login</button>
 </nav>
 
+<!-- Corner Hamburger Menu -->
+<button id="cornerMenuBtn" onclick="toggleCornerMenu()" aria-label="Menu">☰</button>
+<div id="cornerMenuPanel">
+  <a href="#order" onclick="event.preventDefault(); smoothScrollTo('order'); toggleCornerMenu(false);">
+    <span>📝</span><span class="i18n" data-en="Place an order">စာအပ်ရန်</span>
+  </a>
+  <a href="#samples" onclick="event.preventDefault(); smoothScrollTo('samples'); toggleCornerMenu(false);">
+    <span>🎬</span><span class="i18n" data-en="View video samples">Vd နမူနာကြည့်ရန်</span>
+  </a>
+  <a href="#pricing" onclick="event.preventDefault(); smoothScrollTo('pricing'); toggleCornerMenu(false);">
+    <span>💰</span><span class="i18n" data-en="View prices">စျေးနှုန်းများကြည့်ရန်</span>
+  </a>
+  <hr>
+  <button type="button" class="menu-item" id="langToggleBtn" onclick="toggleLang()">
+    <span id="langFlag">🇬🇧</span><span id="langLabel">English</span>
+  </button>
+</div>
+
 <!-- Hero -->
 <section class="hero">
   <div class="floating-petals" id="petals"></div>
 
-  <div class="hero-badge">✨ မင်္ဂလာပါ ကြိုဆိုပါတယ် ✨</div>
+  <div class="hero-badge i18n" data-en="✨ Welcome ✨">✨ မင်္ဂလာပါ ကြိုဆိုပါတယ် ✨</div>
 
   <h1>
     <span class="italic">𝑴𝒆𝒔𝒔𝒂𝒈𝒆 𝒇𝒐𝒓 𝒚𝒐𝒖</span><br>
     ᥫ᭡
   </h1>
 
-  <p class="hero-subtitle">နှလုံးသားမှ ထွက်လာသော စကားလုံးများ</p>
+  <p class="hero-subtitle i18n" data-en="Words straight from the heart">နှလုံးသားမှ ထွက်လာသော စကားလုံးများ</p>
 
-  <p class="hero-desc">
+  <p class="hero-desc i18n" data-en="Birthday · Love · Friendship<br>For the girls/guys you want to melt the heart of<br><strong>Words that soothe a hurting heart</strong> — you can get them here">
     မွေးနေ့ · ချစ်ခြင်းမေတ္တာ · သူငယ်ချင်း<br>
     ကောင်မလေး/ကောင်လေးတွေ ကိုကိုမောင်မောင် နားထောင်ချင်သော<br>
     <strong>စိတ်ကောက်တာကိုချော့ သောစကားလုံးများ</strong> ဤနေရာတွင် ရနိုင်သည်
   </p>
 
   <div class="btn-group">
-    <button class="btn-primary" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'});">စျေးနှုန်းများကြည့်ရန် ↓</button>
-    <button class="btn-secondary" onclick="document.getElementById('samples').scrollIntoView({behavior:'smooth'});">နမူနာများကြည့်ရန် ↓</button>
+    <button class="btn-primary i18n" data-en="View Prices ↓" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'});">စျေးနှုန်းများကြည့်ရန် ↓</button>
+    <button class="btn-secondary i18n" data-en="View Samples ↓" onclick="document.getElementById('samples').scrollIntoView({behavior:'smooth'});">နမူနာများကြည့်ရန် ↓</button>
   </div>
 </section>
 
 <!-- How it works -->
 <section class="how" id="how">
-  <h2 class="section-title">ဘယ်လို <span class="accent">မှာယူ</span>မလဲ?</h2>
-  <p class="section-sub">အဆင့် ၄ ဆင့်သာ</p>
+  <h2 class="section-title"><span class="i18n" data-en="How to">ဘယ်လို</span> <span class="accent i18n" data-en="Order">မှာယူ</span><span class="i18n" data-en="?">မလဲ?</span></h2>
+  <p class="section-sub i18n" data-en="Just 4 easy steps">အဆင့် ၄ ဆင့်သာ</p>
 
   <div class="steps">
     <div class="step">
       <div class="step-num">1</div>
-      <h3>Plan ရွေးမည်</h3>
-      <p>3000 ကျပ် သို့မဟုတ် 5000 ကျပ် plan ကိုရွေးပါ</p>
+      <h3 class="i18n" data-en="Choose a Plan">Plan ရွေးမည်</h3>
+      <p class="i18n" data-en="Pick the plan that suits you">3000 ကျပ် သို့မဟုတ် 5000 ကျပ် plan ကိုရွေးပါ</p>
     </div>
     <div class="step">
       <div class="step-num">2</div>
-      <h3>အချက်အလက် ဖြည့်မည်</h3>
-      <p>ဘယ်သူ့အတွက်? ဘာ occasion? ကိုယ်ပိုင်ဆန္ဒ?</p>
+      <h3 class="i18n" data-en="Fill in Details">အချက်အလက် ဖြည့်မည်</h3>
+      <p class="i18n" data-en="Who's it for? What occasion? Your own words?">ဘယ်သူ့အတွက်? ဘာ occasion? ကိုယ်ပိုင်ဆန္ဒ?</p>
     </div>
     <div class="step">
       <div class="step-num">3</div>
-      <h3>ငွေပေးချေမည်</h3>
-      <p>@xinxin2233 မှာ order တင်ပြီး ငွေလွှဲပါ</p>
+      <h3 class="i18n" data-en="Make Payment">ငွေပေးချေမည်</h3>
+      <p class="i18n" data-en="Submit your order & pay via @xinxin2233">@xinxin2233 မှာ order တင်ပြီး ငွေလွှဲပါ</p>
     </div>
     <div class="step">
       <div class="step-num">4</div>
-      <h3>Message ရမည်</h3>
-      <p>သင့် message လှလှလေးကို ရရှိမည် 💌</p>
+      <h3 class="i18n" data-en="Get Your Message">Message ရမည်</h3>
+      <p class="i18n" data-en="Receive your beautiful message 💌">သင့် message လှလှလေးကို ရရှိမည် 💌</p>
     </div>
   </div>
 </section>
 
 <!-- Sample Messages -->
 <section class="samples" id="samples">
-  <h2 class="section-title">နမူနာ <span class="accent">Messages</span></h2>
-  <p class="section-sub">ဤမျှသာ မဟုတ်ပါ — သင်ကြိုက်သော ပုံစံနှင့် ရေးပေးမည်</p>
+  <h2 class="section-title"><span class="i18n" data-en="Sample">နမူနာ</span> <span class="accent">Messages</span></h2>
+  <p class="section-sub i18n" data-en="Not limited to these — written in the style you like">ဤမျှသာ မဟုတ်ပါ — သင်ကြိုက်သော ပုံစံနှင့် ရေးပေးမည်</p>
 
   <div class="samples-grid">
     <div class="sample-card">
       <span class="sample-emoji">🎂</span>
-      <span class="sample-tag tag-birthday">မွေးနေ့</span>
-      <p class="sample-text">"မင်းမွေးနေ့မှာ ဒီလောကကြီးထဲ မင်းရှိတာ ငါ အများကြီးကျေးဇူးတင်တယ်နော်... Happy Birthday 🎉"</p>
+      <span class="sample-tag tag-birthday i18n" data-en="Birthday">မွေးနေ့</span>
+      <p class="sample-text i18n" data-en='"I&#39;m so grateful you exist in this world on your birthday... Happy Birthday 🎉"'>"မင်းမွေးနေ့မှာ ဒီလောကကြီးထဲ မင်းရှိတာ ငါ အများကြီးကျေးဇူးတင်တယ်နော်... Happy Birthday 🎉"</p>
     </div>
     <div class="sample-card">
       <span class="sample-emoji">🌸</span>
-      <span class="sample-tag tag-love">ချော့ချင်တာ</span>
-      <p class="sample-text">"စိတ်ဆိုးနေတာ သိပါတယ်... ငါ မှားတယ်ဆိုရင် တောင်းပန်တယ်နော် 🥺 မင်းမပါဘဲ ဒါမရပ်ဘူး"</p>
+      <span class="sample-tag tag-love i18n" data-en="Comfort">ချော့ချင်တာ</span>
+      <p class="sample-text i18n" data-en='"I know you&#39;re upset... I&#39;m sorry if I was wrong 🥺 It&#39;s not the same without you"'>"စိတ်ဆိုးနေတာ သိပါတယ်... ငါ မှားတယ်ဆိုရင် တောင်းပန်တယ်နော် 🥺 မင်းမပါဘဲ ဒါမရပ်ဘူး"</p>
     </div>
     <div class="sample-card">
       <span class="sample-emoji">💜</span>
-      <span class="sample-tag tag-friend">သူငယ်ချင်း</span>
-      <p class="sample-text">"ငါ့ဘဝမှာ မင်းလို သူငယ်ချင်းမျိုး ရှိတာ ဒဏ်ကြောင်းကောင်းကောင်း ကံကောင်းတာပဲ ✨"</p>
+      <span class="sample-tag tag-friend i18n" data-en="Friendship">သူငယ်ချင်း</span>
+      <p class="sample-text i18n" data-en='"Having a friend like you in my life is such a blessing ✨"'>"ငါ့ဘဝမှာ မင်းလို သူငယ်ချင်းမျိုး ရှိတာ ဒဏ်ကြောင်းကောင်းကောင်း ကံကောင်းတာပဲ ✨"</p>
     </div>
     <div class="sample-card">
       <span class="sample-emoji">💌</span>
-      <span class="sample-tag tag-love">ချစ်ခြင်းမေတ္တာ</span>
-      <p class="sample-text">"မင်းနဲ့ ရှိနေသမျှ ကာလတိုင်း ငါ့အတွက် အထူးသောနေ့ပဲ 🫶 ချစ်တယ်နော်"</p>
+      <span class="sample-tag tag-love i18n" data-en="Love">ချစ်ခြင်းမေတ္တာ</span>
+      <p class="sample-text i18n" data-en='"Every moment I have with you is a special day for me 🫶 I love you"'>"မင်းနဲ့ ရှိနေသမျှ ကာလတိုင်း ငါ့အတွက် အထူးသောနေ့ပဲ 🫶 ချစ်တယ်နော်"</p>
     </div>
     <div class="sample-card">
       <span class="sample-emoji">🎀</span>
-      <span class="sample-tag tag-birthday">Pin VD</span>
-      <p class="sample-text">Pin VD ယူရင် total 15,000 ကျသင့်ပါသည် 💜<br><br>📌 Pin လေးက လူရှိရင် 7 ရက် စောင့်ရပါမယ် — ပြည့်ရင် pin တင်ပေးပြီး ၁၂ နာရီအတွင်း အမြန်တင်ပေးပါသည် ✨</p>
+      <span class="sample-tag tag-birthday i18n" data-en="Pin VD">Pin VD</span>
+      <p class="sample-text i18n" data-en="If you add Pin VD, total is 15,000 Ks 💜<br><br>📌 If someone already has a pin, you'll need to wait 7 days — once available, we'll pin your post and deliver within 12 hours ✨">Pin VD ယူရင် total 15,000 ကျသင့်ပါသည် 💜<br><br>📌 Pin လေးက လူရှိရင် 7 ရက် စောင့်ရပါမယ် — ပြည့်ရင် pin တင်ပေးပြီး ၁၂ နာရီအတွင်း အမြန်တင်ပေးပါသည် ✨</p>
     </div>
     <div class="sample-card">
       <span class="sample-emoji">🔍</span>
-      <span class="sample-tag tag-friend">လူရှာ / Acc ရှာ</span>
-      <p class="sample-text">လူရှာ post တွေကို မင်မင်တို့ဘက်က 5,000 ယူပါတယ်ဗျ 🔍✨</p>
+      <span class="sample-tag tag-friend i18n" data-en="Find Person / Account">လူရှာ / Acc ရှာ</span>
+      <p class="sample-text i18n" data-en="We charge 5,000 Ks for &quot;find person&quot; posts 🔍✨">လူရှာ post တွေကို မင်မင်တို့ဘက်က 5,000 ယူပါတယ်ဗျ 🔍✨</p>
     </div>
   </div>
 
@@ -1097,17 +1187,17 @@
     <!-- 2000 ကျပ် - ပုံ -->
     <div style="background:white; border-radius:20px; overflow:hidden; border:1.5px solid #f5a8cb; text-align:center; padding-bottom:1rem; box-shadow:0 4px 16px rgba(224,104,154,0.1);">
       <div style="background:linear-gradient(135deg,#fad4e5,#d8c8f8); padding:0.8rem;">
-        <span style="font-size:1rem; color:#b8456e; font-weight:600;">🌷 2,000 ကျပ် နမူနာ</span>
+        <span style="font-size:1rem; color:#b8456e; font-weight:600;" class="i18n" data-en="🌷 2,000 Ks Sample">🌷 2,000 ကျပ် နမူနာ</span>
       </div>
       <img src="IMG_20260502_154448_535.jpg" alt="2000 plan နမူနာ"
            style="width:100%; max-height:320px; object-fit:cover; display:block;">
-      <p style="color:#7a5a7a; font-size:0.85rem; margin-top:0.8rem; padding:0 1rem;">📸 ပုံ message format</p>
+      <p style="color:#7a5a7a; font-size:0.85rem; margin-top:0.8rem; padding:0 1rem;" class="i18n" data-en="📸 Photo message format">📸 ပုံ message format</p>
     </div>
 
     <!-- 3000 ကျပ် - Video -->
     <div style="background:white; border-radius:20px; overflow:hidden; border:1.5px solid #f5a8cb; text-align:center; padding-bottom:1rem; box-shadow:0 4px 16px rgba(224,104,154,0.1);">
       <div style="background:linear-gradient(135deg,#fad4e5,#d8c8f8); padding:0.8rem;">
-        <span style="font-size:1rem; color:#b8456e; font-weight:600;">🌸 3,000 ကျပ် နမူနာ</span>
+        <span style="font-size:1rem; color:#b8456e; font-weight:600;" class="i18n" data-en="🌸 3,000 Ks Sample">🌸 3,000 ကျပ် နမူနာ</span>
       </div>
       <video controls style="width:100%; max-height:320px; display:block; background:#000;">
         <source src="VID_20260503_094706_222.mp4" type="video/mp4">
@@ -1118,7 +1208,7 @@
     <!-- 5000 ကျပ် - Video -->
     <div style="background:white; border-radius:20px; overflow:hidden; border:1.5px solid #9b7be8; text-align:center; padding-bottom:1rem; box-shadow:0 4px 16px rgba(155,123,232,0.1);">
       <div style="background:linear-gradient(135deg,#d8c8f8,#fad4e5); padding:0.8rem;">
-        <span style="font-size:1rem; color:#6a3fa0; font-weight:600;">💜 5,000 ကျပ် နမူနာ</span>
+        <span style="font-size:1rem; color:#6a3fa0; font-weight:600;" class="i18n" data-en="💜 5,000 Ks Sample">💜 5,000 ကျပ် နမူနာ</span>
       </div>
       <video controls style="width:100%; max-height:320px; display:block; background:#000;">
         <source src="VID_20260502_154442_902.mp4" type="video/mp4">
@@ -1135,7 +1225,19 @@
       <video controls style="width:100%; max-height:320px; display:block; background:#000;">
         <source src="New%20Project%2011%20%5BD9F1E01%5D.mp4" type="video/mp4">
       </video>
-      <p style="color:#7a5a7a; font-size:0.85rem; margin-top:0.8rem; padding:0 1rem;">🎬 Video message format</p>
+      <p style="color:#7a5a7a; font-size:0.85rem; margin-top:0.8rem; padding:0 1rem;" class="i18n" data-en="🎬 Video message format">🎬 Video message format</p>
+    </div>
+
+    <!-- 8000 ကျပ် - New Web Vision - Video (sample placeholder) -->
+    <div style="background:white; border-radius:20px; overflow:hidden; border:1.5px solid #9b7be8; text-align:center; padding-bottom:1rem; box-shadow:0 4px 16px rgba(155,123,232,0.12);">
+      <div style="background:linear-gradient(135deg,#d8c8f8,#ffd4b8); padding:0.8rem;">
+        <span style="font-size:1rem; color:#6a3fa0; font-weight:600; white-space:nowrap;" class="i18n" data-en="🌐 8,000 Ks Web Vision Sample">🌐 8,000 ကျပ် Web Vision နမူနာ</span>
+      </div>
+      <!-- New Web Vision video sample -->
+      <video controls style="width:100%; max-height:320px; display:block; background:#000;">
+        <source src="stick/VID_20260801_233413_398.mp4" type="video/mp4">
+      </video>
+      <p style="color:#7a5a7a; font-size:0.85rem; margin-top:0.8rem; padding:0 1rem;" class="i18n" data-en="🎬 Video message format">🎬 Video message format</p>
     </div>
 
   </div>
@@ -1143,8 +1245,8 @@
 
 <!-- Pricing -->
 <section class="pricing" id="pricing">
-  <h2 class="section-title">စျေးနှုန်း <span class="accent">Plans</span></h2>
-  <p class="section-sub">သင့်အတွက် ကိုက်ညီသော plan ကိုရွေးပါ</p>
+  <h2 class="section-title"><span class="i18n" data-en="Pricing">စျေးနှုန်း</span> <span class="accent">Plans</span></h2>
+  <p class="section-sub i18n" data-en="Choose the plan that fits you">သင့်အတွက် ကိုက်ညီသော plan ကိုရွေးပါ</p>
 
   <div class="pricing-grid" style="max-width:1000px; grid-template-columns:repeat(auto-fit,minmax(260px,1fr));">
 
@@ -1152,80 +1254,96 @@
     <div class="pricing-card featured">
       <div class="featured-badge">အသစ်</div>
       <span class="plan-icon">🌷</span>
-      <div class="plan-name">Mini Plan</div>
-      <div class="plan-desc">ပုံနှင့် message လှလှလေး</div>
-      <div class="plan-price">2,000 <span>ကျပ်</span></div>
+      <div class="plan-name"><span class="i18n" data-en="Mini Plan">Mini Plan</span></div>
+      <div class="plan-desc i18n" data-en="Photo & sweet message">ပုံနှင့် message လှလှလေး</div>
+      <div class="plan-price">2,000 <span class="i18n" data-en="Ks">ကျပ်</span></div>
       <ul class="plan-features">
-        <li><span class="check">✿</span> ကိုယ်ပိုင် personalized message</li>
-        <li><span class="check">✿</span> မွေးနေ့ / ချော့ / သူငယ်ချင်းအတွက်</li>
-        <li><span class="check">✿</span> ပုံ format (image)</li>
-        <li><span class="check">✿</span> ၂၄ နာရီ အတွင်း ပြန်ပို့</li>
+        <li><span class="check">✿</span> <span class="i18n" data-en="Personalized message">ကိုယ်ပိုင် personalized message</span></li>
+        <li><span class="check">✿</span> <span class="i18n" data-en="For birthday / comfort / friends">မွေးနေ့ / ချော့ / သူငယ်ချင်းအတွက်</span></li>
+        <li><span class="check">✿</span> <span class="i18n" data-en="Photo format (image)">ပုံ format (image)</span></li>
+        <li><span class="check">✿</span> <span class="i18n" data-en="Reply within 24 hours">၂၄ နာရီ အတွင်း ပြန်ပို့</span></li>
       </ul>
-      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center;" onclick="event.preventDefault(); smoothScrollTo('order');">မှာမည် 🌷</a>
+      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center;" onclick="event.preventDefault(); smoothScrollTo('order');"><span class="i18n" data-en="Order 🌷">မှာမည် 🌷</span></a>
     </div>
 
     <!-- 3000 Plan -->
     <div class="pricing-card featured">
-      <div class="featured-badge">ဘတ်ဂျက်</div>
+      <div class="featured-badge i18n" data-en="Budget">ဘတ်ဂျက်</div>
       <span class="plan-icon">🌸</span>
-      <div class="plan-name">Soft Plan</div>
-      <div class="plan-desc">ရိုးရှင်းပြီး နှလုံးသားထဲ ထိုးဝင်သော</div>
-      <div class="plan-price">3,000 <span>ကျပ်</span></div>
+      <div class="plan-name"><span class="i18n" data-en="Soft Plan">Soft Plan</span></div>
+      <div class="plan-desc i18n" data-en="Simple and touches the heart">ရိုးရှင်းပြီး နှလုံးသားထဲ ထိုးဝင်သော</div>
+      <div class="plan-price">3,000 <span class="i18n" data-en="Ks">ကျပ်</span></div>
       <ul class="plan-features">
-        <li><span class="check">✿</span> ကိုယ်ပိုင် personalized message</li>
-        <li><span class="check">✿</span> မွေးနေ့ / ချော့ / သူငယ်ချင်းအတွက်</li>
-        <li><span class="check">✿</span> Video message format</li>
-        <li><span class="check">✿</span> ၂၄ နာရီ အတွင်း ပြန်ပို့</li>
+        <li><span class="check">✿</span> <span class="i18n" data-en="Personalized message">ကိုယ်ပိုင် personalized message</span></li>
+        <li><span class="check">✿</span> <span class="i18n" data-en="For birthday / comfort / friends">မွေးနေ့ / ချော့ / သူငယ်ချင်းအတွက်</span></li>
+        <li><span class="check">✿</span> <span class="i18n" data-en="Video message format">Video message format</span></li>
+        <li><span class="check">✿</span> <span class="i18n" data-en="Reply within 24 hours">၂၄ နာရီ အတွင်း ပြန်ပို့</span></li>
       </ul>
-      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center;" onclick="event.preventDefault(); smoothScrollTo('order');">မှာမည် 💌</a>
+      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center;" onclick="event.preventDefault(); smoothScrollTo('order');"><span class="i18n" data-en="Order 💌">မှာမည် 💌</span></a>
     </div>
 
     <!-- 5000 Plan -->
     <div class="pricing-card featured">
-      <div class="featured-badge">လူကြိုက်များ</div>
+      <div class="featured-badge i18n" data-en="Popular">လူကြိုက်များ</div>
       <span class="plan-icon">💜</span>
-      <div class="plan-name">Soft Plan</div>
-      <div class="plan-desc">ရိုးရှင်းပြီး နှလုံးသားထဲ ထိုးဝင်သော</div>
-      <div class="plan-price">5,000 <span>ကျပ်</span></div>
+      <div class="plan-name"><span class="i18n" data-en="Soft Plan">Soft Plan</span></div>
+      <div class="plan-desc i18n" data-en="Simple and touches the heart">ရိုးရှင်းပြီး နှလုံးသားထဲ ထိုးဝင်သော</div>
+      <div class="plan-price">5,000 <span class="i18n" data-en="Ks">ကျပ်</span></div>
       <ul class="plan-features">
-        <li><span class="check">✿</span> ကိုယ်ပိုင် personalized message</li>
-        <li><span class="check">✿</span> မွေးနေ့ / ချော့ / သူငယ်ချင်းအတွက်</li>
-        <li><span class="check">✿</span> Video message format</li>
-        <li><span class="check">✿</span> ၂၄ နာရီ အတွင်း ပြန်ပို့</li>
+        <li><span class="check">✿</span> <span class="i18n" data-en="Personalized message">ကိုယ်ပိုင် personalized message</span></li>
+        <li><span class="check">✿</span> <span class="i18n" data-en="For birthday / comfort / friends">မွေးနေ့ / ချော့ / သူငယ်ချင်းအတွက်</span></li>
+        <li><span class="check">✿</span> <span class="i18n" data-en="Video message format">Video message format</span></li>
+        <li><span class="check">✿</span> <span class="i18n" data-en="Reply within 24 hours">၂၄ နာရီ အတွင်း ပြန်ပို့</span></li>
       </ul>
-      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center;" onclick="event.preventDefault(); smoothScrollTo('order');">မှာမည် 💜</a>
+      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center;" onclick="event.preventDefault(); smoothScrollTo('order');"><span class="i18n" data-en="Order 💜">မှာမည် 💜</span></a>
     </div>
 
     <!-- 7000 New Vision Plan -->
     <div class="pricing-card featured" style="border-color:#f09060; box-shadow:0 8px 30px rgba(240,144,96,0.2);">
-      <div class="featured-badge" style="background:linear-gradient(135deg,#f09060,#e0689a);">အသစ်</div>
+      <div class="featured-badge" style="background:linear-gradient(135deg,#f09060,#e0689a);"><span class="i18n" data-en="New">အသစ်</span></div>
       <span class="plan-icon">✨</span>
-      <div class="plan-name">New Vision</div>
-      <div class="plan-desc">Design အသစ် — မွေးနေ့ / ချော့ / သူငယ်ချင်းအတွက်</div>
-      <div class="plan-price" style="color:#f09060;">7,000 <span>ကျပ်</span></div>
+      <div class="plan-name"><span class="i18n" data-en="New Vision">New Vision</span></div>
+      <div class="plan-desc i18n" data-en="New design — for birthday / comfort / friends">Design အသစ် — မွေးနေ့ / ချော့ / သူငယ်ချင်းအတွက်</div>
+      <div class="plan-price" style="color:#f09060;">7,000 <span class="i18n" data-en="Ks">ကျပ်</span></div>
       <ul class="plan-features">
-        <li><span class="check" style="color:#f09060;">✿</span> ကိုယ်ပိုင် personalized message</li>
-        <li><span class="check" style="color:#f09060;">✿</span> Design အသစ်</li>
-        <li><span class="check" style="color:#f09060;">✿</span> Video message format</li>
-        <li><span class="check" style="color:#f09060;">✿</span> ၂၄ နာရီ အတွင်း ပြန်ပို့</li>
+        <li><span class="check" style="color:#f09060;">✿</span> <span class="i18n" data-en="Personalized message">ကိုယ်ပိုင် personalized message</span></li>
+        <li><span class="check" style="color:#f09060;">✿</span> <span class="i18n" data-en="New design">Design အသစ်</span></li>
+        <li><span class="check" style="color:#f09060;">✿</span> <span class="i18n" data-en="Video message format">Video message format</span></li>
+        <li><span class="check" style="color:#f09060;">✿</span> <span class="i18n" data-en="Reply within 24 hours">၂၄ နာရီ အတွင်း ပြန်ပို့</span></li>
       </ul>
-      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center; background:linear-gradient(135deg,#f09060,#e0689a);" onclick="event.preventDefault(); smoothScrollTo('order');">မှာမည် ✨</a>
+      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center; background:linear-gradient(135deg,#f09060,#e0689a);" onclick="event.preventDefault(); smoothScrollTo('order');"><span class="i18n" data-en="Order ✨">မှာမည် ✨</span></a>
+    </div>
+
+    <!-- 8000 Web Vision Plan -->
+    <div class="pricing-card featured" style="border-color:#9b7be8; box-shadow:0 8px 30px rgba(155,123,232,0.2);">
+      <div class="featured-badge" style="background:linear-gradient(135deg,#9b7be8,#e0689a);"><span class="i18n" data-en="New">အသစ်</span></div>
+      <span class="plan-icon">🌐</span>
+      <div class="plan-name"><span class="i18n" data-en="Web Vision">Web Vision</span></div>
+      <div class="plan-desc"><span class="i18n" data-en="Website design — birthday / love / friend">Design အသစ် — website ပုံစံဖြင့်</span></div>
+      <div class="plan-price" style="color:#9b7be8;">8,000 <span class="i18n" data-en="Ks">ကျပ်</span></div>
+      <ul class="plan-features">
+        <li><span class="check" style="color:#9b7be8;">✿</span> <span class="i18n" data-en="Personalized message">ကိုယ်ပိုင် personalized message</span></li>
+        <li><span class="check" style="color:#9b7be8;">✿</span> <span class="i18n" data-en="5 photos included">ပုံ ၅ ပုံ ထည့်နိုင်</span></li>
+        <li><span class="check" style="color:#9b7be8;">✿</span> <span class="i18n" data-en="Video message format">Video message format</span></li>
+        <li><span class="check" style="color:#9b7be8;">✿</span> <span class="i18n" data-en="Reply within 24 hours">၂၄ နာရီ အတွင်း ပြန်ပို့</span></li>
+      </ul>
+      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center; background:linear-gradient(135deg,#9b7be8,#e0689a);" onclick="event.preventDefault(); smoothScrollTo('order');"><span class="i18n" data-en="Order 🌐">မှာမည် 🌐</span></a>
     </div>
 
     <!-- 10000 Soft Plan -->
     <div class="pricing-card featured">
-      <div class="featured-badge">ကြေငြာ</div>
+      <div class="featured-badge i18n" data-en="Announcement">ကြေငြာ</div>
       <span class="plan-icon">🌟</span>
-      <div class="plan-name">Soft Plan</div>
-      <div class="plan-desc">ကြေငြာအပ်ချင်သူများအတွက်</div>
-      <div class="plan-price">10,000 <span>ကျပ်</span></div>
+      <div class="plan-name"><span class="i18n" data-en="Soft Plan">Soft Plan</span></div>
+      <div class="plan-desc i18n" data-en="For those who want to post an announcement">ကြေငြာအပ်ချင်သူများအတွက်</div>
+      <div class="plan-price">10,000 <span class="i18n" data-en="Ks">ကျပ်</span></div>
       <ul class="plan-features">
-        <li><span class="check">✿</span> ကိုယ်ပိုင် personalized message</li>
-        <li><span class="check">✿</span> 📢 ကြေငြာ post format</li>
-        <li><span class="check">✿</span> Video message format</li>
-        <li><span class="check">✿</span> ၂၄ နာရီ အတွင်း ပြန်ပို့</li>
+        <li><span class="check">✿</span> <span class="i18n" data-en="Personalized message">ကိုယ်ပိုင် personalized message</span></li>
+        <li><span class="check">✿</span> <span class="i18n" data-en="📢 Announcement post format">📢 ကြေငြာ post format</span></li>
+        <li><span class="check">✿</span> <span class="i18n" data-en="Video message format">Video message format</span></li>
+        <li><span class="check">✿</span> <span class="i18n" data-en="Reply within 24 hours">၂၄ နာရီ အတွင်း ပြန်ပို့</span></li>
       </ul>
-      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center;" onclick="event.preventDefault(); smoothScrollTo('order');">မှာမည် 🌟</a>
+      <a href="#order" class="btn-primary" style="display:block; text-decoration:none; text-align:center;" onclick="event.preventDefault(); smoothScrollTo('order');"><span class="i18n" data-en="Order 🌟">မှာမည် 🌟</span></a>
     </div>
 
 
@@ -1234,8 +1352,8 @@
 
 <!-- Order Form -->
 <section class="order" id="order">
-  <h2 class="section-title">ယခု <span class="accent">မှာယူ</span>မည်</h2>
-  <p class="section-sub">အောက်ပါ form ကိုဖြည့်ပြီး @xinxin2233 မှာ ဆက်သွယ်ပါ</p>
+  <h2 class="section-title"><span class="i18n" data-en="Order">ယခု</span> <span class="accent i18n" data-en="Now">မှာယူ</span><span class="i18n" data-en="">မည်</span></h2>
+  <p class="section-sub i18n" data-en="Fill out the form below and contact @xinxin2233">အောက်ပါ form ကိုဖြည့်ပြီး @xinxin2233 မှာ ဆက်သွယ်ပါ</p>
 
   <!-- ငွေချေနည်း info -->
   <div style="max-width:600px; margin:0 auto 2rem; background:linear-gradient(135deg,#fdf0f5,#f0eaff); border-radius:20px; padding:1.5rem; border:1.5px solid #f5a8cb; font-size:0.9rem; color:var(--text-mid); line-height:2;">
@@ -1298,12 +1416,13 @@
 
     <div class="form-group">
       <label>Plan ရွေးချယ်ပါ *</label>
-      <select id="plan" onchange="updateTotal()">
+      <select id="plan" onchange="updateTotal(); toggleExtraPhotoFields();">
         <option value="">— Plan ရွေးပါ —</option>
         <option value="2000">🌷 Mini Plan — 2,000 ကျပ်</option>
         <option value="3000">🌸 Soft Plan — 3,000 ကျပ်</option>
         <option value="5000">💜 Soft Plan — 5,000 ကျပ်</option>
         <option value="7000">✨ New Vision — 7,000 ကျပ်</option>
+        <option value="8000">🌐 Web Vision — 8,000 ကျပ်</option>
         <option value="10000">🌟 Soft Plan — 10,000 ကျပ်</option>
       </select>
     </div>
@@ -1400,6 +1519,42 @@
       </div>
     </div>
 
+    <!-- Extra photo fields (3-5) — only shown for the 8,000 ကျပ် Web Vision plan -->
+    <div id="extraPhotoFields" style="display:none;">
+      <div class="form-group">
+        <label style="white-space:nowrap; font-size:0.8rem;">Acc Profile ပုံ / လူပုံ ၃ 📸 <span style="font-weight:400; color:var(--pink-400);">(မိမိထည့်ချင်သောပုံ)</span></label>
+        <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+          <input type="file" accept="image/*" id="photo3" style="padding:0.6rem 1rem; cursor:pointer; flex:1;">
+          <label style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
+            <input type="checkbox" id="noPhoto3" onchange="document.getElementById('photo3').disabled=this.checked; document.getElementById('photo3').value='';">
+            မရှိဘူး
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label style="white-space:nowrap; font-size:0.8rem;">Acc Profile ပုံ / လူပုံ ၄ 📸 <span style="font-weight:400; color:var(--pink-400);">(မိမိထည့်ချင်သောပုံ)</span></label>
+        <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+          <input type="file" accept="image/*" id="photo4" style="padding:0.6rem 1rem; cursor:pointer; flex:1;">
+          <label style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
+            <input type="checkbox" id="noPhoto4" onchange="document.getElementById('photo4').disabled=this.checked; document.getElementById('photo4').value='';">
+            မရှိဘူး
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label style="white-space:nowrap; font-size:0.8rem;">Acc Profile ပုံ / လူပုံ ၅ 📸 <span style="font-weight:400; color:var(--pink-400);">(မိမိထည့်ချင်သောပုံ)</span></label>
+        <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+          <input type="file" accept="image/*" id="photo5" style="padding:0.6rem 1rem; cursor:pointer; flex:1;">
+          <label style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
+            <input type="checkbox" id="noPhoto5" onchange="document.getElementById('photo5').disabled=this.checked; document.getElementById('photo5').value='';">
+            မရှိဘူး
+          </label>
+        </div>
+      </div>
+    </div>
+
     <div class="form-group">
       <label>ငွေလွဲပြေစာ ပုံ 🧾 *</label>
       <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.6rem;">
@@ -1425,7 +1580,7 @@
 <!-- Footer -->
 <footer>
   <p style="font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.2rem; color: #f5a8cb; margin-bottom: 0.5rem;">𝑴𝒆𝒔𝒔𝒂𝒈𝒆 𝒇𝒐𝒓 𝒚𝒐𝒖ᥫ᭡</p>
-  <p>Order — <a href="https://t.me/xinxin2233" target="_blank">@xinxin2233</a> မှာ ဆက်သွယ်ပါ</p>
+  <p><span class="i18n" data-en="Order — contact">Order — </span><a href="https://t.me/xinxin2233" target="_blank">@xinxin2233</a><span class="i18n" data-en="">မှာ ဆက်သွယ်ပါ</span></p>
   <p style="margin-top: 0.5rem; font-size: 0.75rem; opacity: 0.5;">Made with 💜 for everyone who has something to say</p>
 </footer>
 
@@ -2223,6 +2378,7 @@ document.addEventListener('DOMContentLoaded', function() {
           });
           planSelect.value = '10000';
       }
+      toggleExtraPhotoFields();
     } else {
       // Reset to default
       recipientInput.disabled = false;
@@ -2233,6 +2389,7 @@ document.addEventListener('DOMContentLoaded', function() {
         o.disabled = (o.value === '10000');
       });
       if (planSelect.value === '10000') planSelect.value = '';
+      toggleExtraPhotoFields();
     }
   }
 
@@ -2275,6 +2432,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const contact = document.getElementById('contact').value;
     const photo1 = document.getElementById('photo1').files[0];
     const photo2 = document.getElementById('photo2').files[0];
+    const photo3 = plan === '8000' ? document.getElementById('photo3').files[0] : null;
+    const photo4 = plan === '8000' ? document.getElementById('photo4').files[0] : null;
+    const photo5 = plan === '8000' ? document.getElementById('photo5').files[0] : null;
 
     // Song addon
     const songYes = document.getElementById('songYes') && document.getElementById('songYes').checked;
@@ -2360,11 +2520,14 @@ document.addEventListener('DOMContentLoaded', function() {
       if (payslip) await sendFile(payslip, '🧾 ငွေလွဲပြေစာ');
       if (photo1) await sendFile(photo1, '📸 ပုံ ၁ (Profile/ပုံ)');
       if (photo2) await sendFile(photo2, '📸 ပုံ ၂');
+      if (photo3) await sendFile(photo3, '📸 ပုံ ၃');
+      if (photo4) await sendFile(photo4, '📸 ပုံ ၄');
+      if (photo5) await sendFile(photo5, '📸 ပုံ ၅');
 
       await tgSend(`✅ Order ပြီးဆုံးပါပြီ — စစ်ဆေးပေးပါ 🙏`);
 
       // ③ Structured order record (Telegram-backed, all devices)
-      const planLabels = {'2000':'Mini 2,000','3000':'Soft 3,000','5000':'Soft 5,000','7000':'New Vision 7,000','10000':'Soft 10,000'};
+      const planLabels = {'2000':'Mini 2,000','3000':'Soft 3,000','5000':'Soft 5,000','7000':'New Vision 7,000','8000':'Web Vision 8,000','10000':'Soft 10,000'};
       await saveOrderRecord({
         time: new Date().toLocaleString('my-MM'),
         loginUser: loggedUser,
@@ -2404,18 +2567,19 @@ document.addEventListener('DOMContentLoaded', function() {
       updateTotal();
 
       // Reset file inputs
-      ['payslip','photo1','photo2'].forEach(id => {
+      ['payslip','photo1','photo2','photo3','photo4','photo5'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
       });
 
       // Uncheck "မရှိဘူး" checkboxes & re-enable file inputs
-      ['noPhoto1','noPhoto2'].forEach(id => {
+      ['noPhoto1','noPhoto2','noPhoto3','noPhoto4','noPhoto5'].forEach(id => {
         const cb = document.getElementById(id);
         if (cb) { cb.checked = false; }
       });
       document.getElementById('photo1').disabled = false;
       document.getElementById('photo2').disabled = false;
+      toggleExtraPhotoFields();
 
       // Reset occasion-dependent UI
       handleOccasionChange('');
@@ -2602,10 +2766,76 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   window.updateTotal = updateTotal;
 
+  function toggleExtraPhotoFields() {
+    const plan = document.getElementById('plan').value;
+    const wrap = document.getElementById('extraPhotoFields');
+    if (!wrap) return;
+    const show = (plan === '8000');
+    wrap.style.display = show ? 'block' : 'none';
+    if (!show) {
+      ['photo3','photo4','photo5'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.value = ''; el.disabled = false; }
+      });
+      ['noPhoto3','noPhoto4','noPhoto5'].forEach(id => {
+        const cb = document.getElementById(id);
+        if (cb) cb.checked = false;
+      });
+    }
+  }
+  window.toggleExtraPhotoFields = toggleExtraPhotoFields;
+
   function smoothScrollTo(id) {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   }
+
+  // ===== Corner hamburger menu =====
+  function toggleCornerMenu(force) {
+    const panel = document.getElementById('cornerMenuPanel');
+    if (!panel) return;
+    const shouldOpen = (typeof force === 'boolean') ? force : !panel.classList.contains('open');
+    panel.classList.toggle('open', shouldOpen);
+  }
+  window.toggleCornerMenu = toggleCornerMenu;
+
+  document.addEventListener('click', (e) => {
+    const panel = document.getElementById('cornerMenuPanel');
+    const btn = document.getElementById('cornerMenuBtn');
+    if (!panel || !panel.classList.contains('open')) return;
+    if (panel.contains(e.target) || (btn && btn.contains(e.target))) return;
+    panel.classList.remove('open');
+  });
+
+  // ===== Language toggle (Myanmar <-> English) =====
+  let currentLang = 'my';
+  function toggleLang() {
+    currentLang = (currentLang === 'my') ? 'en' : 'my';
+    document.querySelectorAll('.i18n').forEach(el => {
+      if (!el.dataset.myOrig) el.dataset.myOrig = el.innerHTML;
+      if (currentLang === 'en' && el.dataset.en) {
+        el.innerHTML = el.dataset.en;
+      } else {
+        el.innerHTML = el.dataset.myOrig;
+      }
+    });
+    document.querySelectorAll('[data-placeholder-en]').forEach(el => {
+      if (!el.dataset.placeholderMy) el.dataset.placeholderMy = el.getAttribute('placeholder') || '';
+      el.setAttribute('placeholder', currentLang === 'en' ? el.dataset.placeholderEn : el.dataset.placeholderMy);
+    });
+    const flag = document.getElementById('langFlag');
+    const label = document.getElementById('langLabel');
+    if (currentLang === 'en') {
+      flag.textContent = '🇲🇲';
+      label.textContent = 'မြန်မာ';
+      document.documentElement.lang = 'en';
+    } else {
+      flag.textContent = '🇬🇧';
+      label.textContent = 'English';
+      document.documentElement.lang = 'my';
+    }
+  }
+  window.toggleLang = toggleLang;
 
 
   // Expose functions globally for inline onclick handlers
@@ -2745,4 +2975,4 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 </script>
 </body>
-  </html>
+</html>
