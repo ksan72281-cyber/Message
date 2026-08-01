@@ -1027,7 +1027,7 @@
 
   <div class="btn-group">
     <button class="btn-primary i18n" data-en="View Prices ↓" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'});">စျေးနှုန်းများကြည့်ရန် ↓</button>
-    <button class="btn-secondary i18n" data-en="View Samples ↓" onclick="document.getElementById('samples').scrollIntoView({behavior:'smooth'});">နမူနာများကြည့်ရန် ↓</button>
+    <button class="btn-secondary i18n" data-en="View Samples ↓" onclick="document.getElementById('sampleMedia').scrollIntoView({behavior:'smooth'});">နမူနာများကြည့်ရန် ↓</button>
   </div>
 </section>
 
@@ -1099,7 +1099,7 @@
   </div>
 
   <!-- နမူနာ Media -->
-  <div style="max-width:900px; margin:2rem auto 0; display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5rem; padding:0 1rem;">
+  <div id="sampleMedia" style="max-width:900px; margin:2rem auto 0; display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5rem; padding:0 1rem;">
 
     <!-- 2000 ကျပ် - ပုံ -->
     <div style="background:white; border-radius:20px; overflow:hidden; border:1.5px solid #f5a8cb; text-align:center; padding-bottom:1rem; box-shadow:0 4px 16px rgba(224,104,154,0.1);">
@@ -1418,7 +1418,7 @@
       <label style="white-space:nowrap; font-size:0.8rem;">Acc Profile ပုံ / လူပုံ 📸 <span style="font-weight:400; color:var(--pink-400);">(မိမိထည့်ချင်သောပုံ)</span></label>
       <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
         <input type="file" accept="image/*" id="photo1" style="padding:0.6rem 1rem; cursor:pointer; flex:1;">
-        <label style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
+        <label id="noPhoto1Wrap" style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
           <input type="checkbox" id="noPhoto1" onchange="document.getElementById('photo1').disabled=this.checked; document.getElementById('photo1').value='';">
           မရှိဘူး
         </label>
@@ -1429,7 +1429,7 @@
       <label style="white-space:nowrap; font-size:0.8rem;">Acc Profile ပုံ / လူပုံ ၂ 📸 <span style="font-weight:400; color:var(--pink-400);">(မိမိထည့်ချင်သောပုံ)</span></label>
       <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
         <input type="file" accept="image/*" id="photo2" style="padding:0.6rem 1rem; cursor:pointer; flex:1;">
-        <label style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
+        <label id="noPhoto2Wrap" style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
           <input type="checkbox" id="noPhoto2" onchange="document.getElementById('photo2').disabled=this.checked; document.getElementById('photo2').value='';">
           မရှိဘူး
         </label>
@@ -1442,7 +1442,7 @@
         <label style="white-space:nowrap; font-size:0.8rem;">Acc Profile ပုံ / လူပုံ ၃ 📸 <span style="font-weight:400; color:var(--pink-400);">(မိမိထည့်ချင်သောပုံ)</span></label>
         <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
           <input type="file" accept="image/*" id="photo3" style="padding:0.6rem 1rem; cursor:pointer; flex:1;">
-          <label style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
+          <label id="noPhoto3Wrap" style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
             <input type="checkbox" id="noPhoto3" onchange="document.getElementById('photo3').disabled=this.checked; document.getElementById('photo3').value='';">
             မရှိဘူး
           </label>
@@ -1453,7 +1453,7 @@
         <label style="white-space:nowrap; font-size:0.8rem;">Acc Profile ပုံ / လူပုံ ၄ 📸 <span style="font-weight:400; color:var(--pink-400);">(မိမိထည့်ချင်သောပုံ)</span></label>
         <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
           <input type="file" accept="image/*" id="photo4" style="padding:0.6rem 1rem; cursor:pointer; flex:1;">
-          <label style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
+          <label id="noPhoto4Wrap" style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
             <input type="checkbox" id="noPhoto4" onchange="document.getElementById('photo4').disabled=this.checked; document.getElementById('photo4').value='';">
             မရှိဘူး
           </label>
@@ -1464,7 +1464,7 @@
         <label style="white-space:nowrap; font-size:0.8rem;">Acc Profile ပုံ / လူပုံ ၅ 📸 <span style="font-weight:400; color:var(--pink-400);">(မိမိထည့်ချင်သောပုံ)</span></label>
         <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
           <input type="file" accept="image/*" id="photo5" style="padding:0.6rem 1rem; cursor:pointer; flex:1;">
-          <label style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
+          <label id="noPhoto5Wrap" style="display:flex; align-items:center; gap:0.4rem; font-weight:400; cursor:pointer; white-space:nowrap;">
             <input type="checkbox" id="noPhoto5" onchange="document.getElementById('photo5').disabled=this.checked; document.getElementById('photo5').value='';">
             မရှိဘူး
           </label>
@@ -2387,6 +2387,12 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
+    // 8,000 ကျပ် Web Vision plan requires all 5 photos before an order can be submitted
+    if (plan === '8000' && (!photo1 || !photo2 || !photo3 || !photo4 || !photo5)) {
+      alert('⚠️ 8,000 ကျပ် Plan အတွက် ပုံ ၅ ပုံ အားလုံး ထည့်ပေးရပါမည်');
+      return;
+    }
+
     const occasionText = {
       'birthday': '🎂 မွေးနေ့', 'love': '💌 ချော့ချင်တာ', 'friend': '💜 သူငယ်ချင်း', 
       'apology': '🥺 တောင်းပန်တာ', 'find': '🔍 လူရှာ', 'announce': '📢 ကြေငြာ', 'other': '✨ အခြား'
@@ -2699,6 +2705,22 @@ document.addEventListener('DOMContentLoaded', function() {
         if (cb) cb.checked = false;
       });
     }
+    // 8,000 ကျပ် Web Vision plan needs all 5 photos — hide the "မရှိဘူး" (not available)
+    // option for every photo slot so users can't skip uploads. Restore it for other plans.
+    ['noPhoto1Wrap','noPhoto2Wrap','noPhoto3Wrap','noPhoto4Wrap','noPhoto5Wrap'].forEach(id => {
+      const label = document.getElementById(id);
+      if (label) label.style.display = show ? 'none' : 'flex';
+    });
+    if (show) {
+      ['noPhoto1','noPhoto2','noPhoto3','noPhoto4','noPhoto5'].forEach(id => {
+        const cb = document.getElementById(id);
+        if (cb && cb.checked) cb.checked = false;
+      });
+      ['photo1','photo2','photo3','photo4','photo5'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+    }
   }
   window.toggleExtraPhotoFields = toggleExtraPhotoFields;
 
@@ -2706,6 +2728,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   }
+  window.smoothScrollTo = smoothScrollTo;
 
   // ===== Language toggle (Myanmar <-> English) =====
   let currentLang = 'my';
